@@ -1,4 +1,7 @@
 # emark
+
+<img alt="emark logo: envelope with markdown stamp" src="emark-logo.png" width="320" height="170" style="float: right">
+
 Markdown template based HTML and text emails for Django.
 
 * simple email templates with markdown
