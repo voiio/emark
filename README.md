@@ -1,6 +1,6 @@
 # Django eMark↓
 
-<img alt="emark logo: envelope with markdown stamp" src="emark-logo.svg" width="320" height="170" align="right">
+<img alt="emark logo: envelope with markdown stamp" src="https://raw.githubusercontent.com/voiio/emark/main/emark-logo.svg" width="320" height="170" align="right">
 
 Markdown template based HTML and text emails for Django.
 
