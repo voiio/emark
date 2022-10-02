@@ -36,7 +36,7 @@ classifiers = [
   "Framework :: Django :: 4.0",
   "Framework :: Django :: 4.1",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10" 
 dependencies = ["django", "markdown"]
 
 [project.optional-dependencies]
