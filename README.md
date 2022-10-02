@@ -15,7 +15,7 @@ Markdown template based HTML and text emails for Django.
 
 ## Setup
 
-```shell
+```ShellSession
 python3 -m pip install emark
 ```
 
@@ -27,7 +27,7 @@ INSTALLED_APPS = [
 ]
 ```
 
-```shell
+```ShellSession
 python3 manage.py migrate
 ```
 
