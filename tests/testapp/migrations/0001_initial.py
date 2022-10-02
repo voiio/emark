@@ -199,7 +199,7 @@ class Migration(migrations.Migration):
                             ("zh-hans", "Simplified Chinese"),
                             ("zh-hant", "Traditional Chinese"),
                         ],
-                        default="",
+                        default="en-us",
                         verbose_name="language",
                     ),
                 ),

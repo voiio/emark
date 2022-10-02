@@ -28,15 +28,13 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Framework :: Django",
   "Framework :: Django :: 3.2",
   "Framework :: Django :: 4.0",
   "Framework :: Django :: 4.1",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = ["django", "markdown"]
 
 [project.optional-dependencies]
