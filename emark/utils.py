@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import re
 from html.parser import HTMLParser
+from typing import Dict
 
 __all__ = ["HTML2TextParser"]
 
@@ -17,8 +18,8 @@ class Node:
     """
 
     name: str
-    attrs: {str: str}
     parent: Node | None
+    attrs: Dict[str:str] = dataclasses.field(default_factory=dict)
     children: list[Node | str] = dataclasses.field(init=False, default_factory=list)
 
     def __post_init__(self):
@@ -52,7 +53,8 @@ class Node:
                     return f"[image: {self.attrs['alt']}]"
             case "script" | "style" | "title":
                 return ""
-        return f"{self.text}"
+            case _:
+                return self.text
 
     @property
     def text(self) -> str:
@@ -115,6 +117,71 @@ class HTML2TextParser(HTMLParser):
         """Add text as a leave to the current node."""
         if self.root:
             self.root.children.append(data)
+
+    @classmethod
+    def from_html(cls, html: str) -> HTML2TextParser:
+        """Parse HTML and return a HTML2TextParser instance.
+        >>> HTML2TextParser.from_html(html).text
+        """
+        parser = cls()
+        parser.feed(html)
+        return parser
+
+    @classmethod
+    def to_text(cls, html: str) -> str:
+        """Parse HTML and return plain text. Similar to Gmail.
+        >>> HTML2TextParser.to_text(html)
+        """
+        return str(cls.from_html(html))
+
+    @classmethod
+    def from_file(cls, path: str) -> HTML2TextParser:
+        """Parse HTML from a file and return a HTML2TextParser instance.
+        >>> HTML2TextParser.from_file(path).text
+        """
+        with open(path, "r") as file:
+            return cls.from_html(file.read())
+
+    @classmethod
+    def from_url(cls, url: str) -> HTML2TextParser:
+        """Parse HTML from a URL and return a HTML2TextParser instance. Requires requests.
+        >>> HTML2TextParser.from_url(url).text
+        """
+        import requests
+
+        return cls.from_html(requests.get(url).text)
+
+    @classmethod
+    def from_email(cls, email: str) -> HTML2TextParser:
+        """Parse HTML from an email and return a HTML2TextParser instance. Requires email.
+        >>> HTML2TextParser.from_email(email).text
+        """
+        import email
+
+        message = email.message_from_string(email)
+        if message.is_multipart():
+            for part in message.walk():
+                if part.get_content_type() == "text/html":
+                    return cls.from_html(part.get_payload())
+        else:
+            return cls.from_html(message.get_payload())
+
+    @classmethod
+    def from_bytes(cls, data: bytes) -> HTML2TextParser:
+        """Parse HTML from bytes and return a HTML2TextParser instance.
+        >>> HTML2TextParser.from_bytes(data).text
+        """
+        return cls.from_html(data.decode())
+
+    def __hash__(self) -> int:
+        """Return a hash value for the parser."""
+        return hash(self.text)
+
+    def __eq__(self, other: object) -> bool:
+        """Return True if the parsers are equal."""
+        if isinstance(other, HTML2TextParser):
+            return self.text == other.text
+        return False
 
     def __str__(self) -> str:
         # remove leading/trailing whitespace
