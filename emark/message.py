@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import re
 from urllib import parse
 
 import markdown
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
 from django.utils import translation
 from django.utils.safestring import mark_safe
 
-from emark import utils
+from emark import conf, utils
 
 INLINE_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
 INLINE_HTML_LINK_RE = re.compile(r"href=\"([^\"]+)\"")
@@ -40,7 +43,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         language: str,
         subject: str = "",
         context: dict = None,
-        utm=None,
+        utm_params=None,
         template=None,
         **kwargs,
     ):
@@ -48,15 +51,14 @@ class MarkdownEmail(EmailMultiAlternatives):
         template = template or self.get_template()
         self.context = context or {}
         self.language = language
-        if utm is None:
-            utm = {}
+        utm_params = utm_params or {}
 
         context = self.get_context_data(**self.context)
-        context |= self.get_default_utm_params() | utm
+        context |= self.get_utm_params(**utm_params)
 
         with translation.override(language):
             subject = subject or self.get_subject(**context)
-            markdown_string = self.get_markdown_string(template, context, utm)
+            markdown_string = self.get_markdown_string(template, context, utm_params)
 
             self.html = self.render_html(
                 markdown_string=markdown_string,
@@ -74,15 +76,19 @@ class MarkdownEmail(EmailMultiAlternatives):
             self.attach_alternative(self.html, "text/html")
 
     @classmethod
-    def get_default_utm_params(cls):
-        return {
-            "utm_source": "platform",
-            "utm_medium": "email",
-            "utm_campaign": cls.get_utm_campaign_name(),
-        }
+    def get_utm_params(cls, **params: {str: str}) -> {str: str}:
+        """Return a dictionary of UTM parameters."""
+        return (
+            conf.get_settings().UTM_PARAMS
+            | {
+                "utm_campaign": cls.get_utm_campaign_name(),
+            }
+            | params
+        )
 
     @classmethod
     def get_utm_campaign_name(cls):
+        """Return the UTM campaign name for this email."""
         return "_".join(
             (m.group(0) for m in CLS_NAME_TO_CAMPAIGN_RE.finditer(cls.__qualname__))
         ).upper()
@@ -113,13 +119,14 @@ class MarkdownEmail(EmailMultiAlternatives):
             raise ValueError("User has no email address")
         if not user.is_active:
             raise ValueError("User is not active")
-        try:
-            language = language or user.language
-        except AttributeError as e:
-            raise ValueError(
-                "If your user model does not have a language field,"
-                " you must provide a language."
-            ) from e
+        if settings.USE_I18N:
+            try:
+                language = language or user.language
+            except AttributeError as e:
+                raise ValueError(
+                    "If your user model does not have a language field,"
+                    " you must provide a language."
+                ) from e
         context = context or {}
         context |= {
             "short_name": user.get_short_name(),
@@ -142,9 +149,11 @@ class MarkdownEmail(EmailMultiAlternatives):
         return self.template
 
     def get_context_data(self, **context):
+        """Return the context data for the email."""
         return self.context | context
 
     def get_subject(self, **context):
+        """Return the email's subject."""
         if not self.subject:
             raise ImproperlyConfigured(
                 f"{self.__class__.__qualname__} is missing a subject."
@@ -154,7 +163,7 @@ class MarkdownEmail(EmailMultiAlternatives):
     def get_markdown_string(self, template, context, utm):
         markdown_string = loader.get_template(template).render(context)
         markdown_string = self.set_utm_attributes(
-            markdown_string, **(self.get_default_utm_params() | utm)
+            markdown_string, **self.get_utm_params(**utm)
         )
         return markdown_string
 
