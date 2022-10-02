@@ -100,6 +100,19 @@ class TestMarkdownEmail:
             == "If your user model does not have a language field, you must provide a language."
         )
 
+    @pytest.mark.django_db
+    def test_to_user__i18n_off(self, settings):
+        settings.USE_I18N = False
+        user = baker.prepare(
+            "auth.User",
+            email="spiderman@avengers.com",
+        )
+        MarkdownEmailTest.to_user(
+            user,
+            subject="I don't want to go!",
+            context={"donut_name": "Nutty Donut", "donut_type": "Frosted"},
+        ).send()
+
     def test_to_user__override_default(self):
         user = baker.prepare(
             settings.AUTH_USER_MODEL,
@@ -192,11 +205,11 @@ class TestMarkdownEmail:
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
         assert (
-            "This is a link! <https://www.example.com?utm_source=platform&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
+            "This is a link! <https://www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
         )
         assert (
-            "This is another link! <https://www.example.com/?utm_source=platform&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT&foo=bar>"
+            "This is another link! <https://www.example.com/?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT&foo=bar>"
             in email_message.body
         )
 
@@ -206,11 +219,11 @@ class TestMarkdownEmail:
             == "MARKDOWN_EMAIL_TEST_WITH_SUBJECT"
         )
 
-    def test_get_default_utm_params(self):
-        assert MarkdownEmailTestWithSubject.get_default_utm_params() == {
+    def test_get_utm_params(self):
+        assert MarkdownEmailTestWithSubject.get_utm_params() == {
             "utm_campaign": "MARKDOWN_EMAIL_TEST_WITH_SUBJECT",
             "utm_medium": "email",
-            "utm_source": "platform",
+            "utm_source": "website",
         }
 
     def test_update_url_params(self):
