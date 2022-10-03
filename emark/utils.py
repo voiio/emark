@@ -128,13 +128,6 @@ class HTML2TextParser(HTMLParser):
         return parser
 
     @classmethod
-    def to_text(cls, html: str) -> str:
-        """Parse HTML and return plain text. Similar to Gmail.
-        >>> HTML2TextParser.to_text(html)
-        """
-        return str(cls.from_html(html))
-
-    @classmethod
     def from_file(cls, path: str) -> HTML2TextParser:
         """Parse HTML from a file and return a HTML2TextParser instance.
         >>> HTML2TextParser.from_file(path).text
@@ -147,9 +140,14 @@ class HTML2TextParser(HTMLParser):
         """Parse HTML from a URL and return a HTML2TextParser instance. Requires requests.
         >>> HTML2TextParser.from_url(url).text
         """
-        import requests
+        import urllib3
 
-        return cls.from_html(requests.get(url).text)
+        http = urllib3.PoolManager()
+        try:
+            response = http.request("GET", url, headers={"Content-Type": "text/html"})
+            return cls.from_html(response.data.decode("utf-8"))
+        except Exception as e:
+            raise urllib3.exceptions.HTTPError("Failed to fetch URL")
 
     @classmethod
     def from_email(cls, email: str) -> HTML2TextParser:
@@ -158,13 +156,16 @@ class HTML2TextParser(HTMLParser):
         """
         import email
 
-        message = email.message_from_string(email)
-        if message.is_multipart():
-            for part in message.walk():
-                if part.get_content_type() == "text/html":
-                    return cls.from_html(part.get_payload())
-        else:
-            return cls.from_html(message.get_payload())
+        try:
+            message = email.message_from_string(email)
+            if message.is_multipart():
+                for part in message.walk():
+                    if part.get_content_type() == "text/html":
+                        return cls.from_html(part.get_payload())
+            else:
+                return cls.from_html(message.get_payload())
+        except Exception as e:
+            raise UserWarning(f"Failed to parse email: {e}")
 
     @classmethod
     def from_bytes(cls, data: bytes) -> HTML2TextParser:
