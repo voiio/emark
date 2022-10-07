@@ -158,3 +158,7 @@ class MyMessage(MarkdownEmail):
 # or alternatively during instantiation
 MyMessage(utm_params={"utm_campaign": "my-other-campaign"}).send()
 ```
+
+## Credits
+
+- Django eMark uses modified version of [Responsive HTML Email Template](https://github.com/leemunroe/responsive-html-email-template/) as a base template.
