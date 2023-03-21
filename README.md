@@ -8,6 +8,7 @@ Markdown template based HTML and text emails for Django.
 * support for HTML and text emails
 * i18n support
 * built-in UTM tracking
+* automatic CSS inliner via [premailer](https://github.com/peterbe/premailer/)
 
 [![PyPi Version](https://img.shields.io/pypi/v/emark.svg)](https://pypi.python.org/pypi/emark/)
 [![Test Coverage](https://codecov.io/gh/voiio/emark/branch/main/graph/badge.svg)](https://codecov.io/gh/voiio/emark)
@@ -161,4 +162,5 @@ MyMessage(utm_params={"utm_campaign": "my-other-campaign"}).send()
 
 ## Credits
 
-- Django eMark uses modified version of [Responsive HTML Email Template](https://github.com/leemunroe/responsive-html-email-template/) as a base template.
+- Django eMark uses modified version of [Responsive HTML Email Template](https://github.com/leemunroe/responsive-html-email-template/) as a base template
+- For CSS inlining, Django eMark uses [premailer](https://github.com/peterbe/premailer/)
