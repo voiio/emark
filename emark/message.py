@@ -152,7 +152,7 @@ class MarkdownEmail(EmailMultiAlternatives):
 
     def get_context_data(self, **context):
         """Return the context data for the email."""
-        return self.context | context
+        return self.context | {"DEBUG": settings.DEBUG} | context
 
     def get_subject(self, **context):
         """Return the email's subject."""

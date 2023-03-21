@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <title>{{ subject }}</title>
-  {% block styles %}
-  {% include "emark/styles.html" %}
-  {% endblock styles %}
+  <style>
+    {% block styles %}
+    {% include "emark/styles.css" %}
+    {% endblock styles %}
+  </style>
 </head>
 <body>
 {% block preheader %}
@@ -50,6 +52,7 @@
         <!-- START FOOTER -->
         {% spaceless %}
         {% block footer %}
+        {% if DEBUG %}
         <div class="footer">
           <table role="presentation" border="0" cellpadding="0" cellspacing="0">
             <tr>
@@ -65,6 +68,7 @@
             </tr>
           </table>
         </div>
+        {% endif %}
         {% endblock footer %}
         {% endspaceless %}
         <!-- END FOOTER -->

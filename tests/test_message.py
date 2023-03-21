@@ -185,6 +185,7 @@ class TestMarkdownEmail:
         assert email_message.get_context_data(**custom_context) == {
             "donut_type": "Honey",
             "donut_name": "HoneyNuts",
+            "DEBUG": False,
         }
 
     def test_get_template(self):
