@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import logging
 import re
 from urllib import parse
 
 import markdown
+import premailer
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
@@ -179,4 +181,12 @@ class MarkdownEmail(EmailMultiAlternatives):
         context["markdown_string"] = mark_safe(html_message)  # nosec
 
         template = loader.get_template(self.base_html_template)
-        return template.render(context)
+        rendered_html = template.render(context)
+
+        inlined_html = premailer.transform(
+            html=rendered_html,
+            strip_important=False,
+            keep_style_tags=True,
+            cssutils_logging_level=logging.WARNING,
+        )
+        return inlined_html

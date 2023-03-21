@@ -133,10 +133,21 @@ class TestMarkdownEmail:
         assert email_message.subject == "Peanut strikes back"
 
         assert "Vanilla lollipop biscuit cake marzipan jelly." in email_message.body
-        assert "<h1>Nutty Donut</h1><h2>Description</h2>" in email_message.html
-        assert "<p><em>Type: Frosted</em></p>" in email_message.html
         assert (
-            "<p>Vanilla lollipop biscuit cake marzipan jelly.</p>" in email_message.html
+            """<h1 style="color:#000; font-family:sans-serif; font-weight:300; line-height:1.4; margin:0; margin-bottom:30px; font-size:35px; text-align:center; text-transform:capitalize" align="center">Nutty Donut</h1>"""
+            in email_message.html
+        )
+        assert (
+            """<h2 style="color:#000; font-family:sans-serif; font-weight:400; line-height:1.4; margin:0; margin-bottom:30px">Description</h2>"""
+            in email_message.html
+        )
+        assert (
+            """<p style="font-family:sans-serif; font-size:14px; font-weight:normal; margin:0; margin-bottom:15px"><em>Type: Frosted</em></p>"""
+            in email_message.html
+        )
+        assert (
+            """<p style="font-family:sans-serif; font-size:14px; font-weight:normal; margin:0; margin-bottom:15px">Vanilla lollipop biscuit cake marzipan jelly.</p>"""
+            in email_message.html
         )
 
         assert len(email_message.alternatives) == 1
