@@ -55,8 +55,8 @@ jobs:
           - "3.11"
         django-version:
           - "3.2"  # LTS
-          - "4.0"
           - "4.1"
+          - "4.2"  # LTS
         extras:
           - "test"
 
