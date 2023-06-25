@@ -6,12 +6,16 @@ from urllib import parse
 
 import markdown
 import premailer
+from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
 from django.template import loader
+from django.urls import reverse
 from django.utils import translation
 from django.utils.safestring import mark_safe
+from django.utils.text import capfirst
+from django.utils.translation import gettext
 
 from emark import conf, utils
 
@@ -39,6 +43,7 @@ class MarkdownEmail(EmailMultiAlternatives):
     base_html_template = "emark/base.html"
     template = None
     subject = None
+    _tracking_uuid = False
 
     def __init__(
         self,
@@ -50,19 +55,25 @@ class MarkdownEmail(EmailMultiAlternatives):
         **kwargs,
     ):
         """Initialize an email message and attach a rendered HTML version of it."""
-        template = template or self.get_template()
+        self.template = template or self.template
         self.context = context or {}
         self.language = language
-        utm_params = utm_params or {}
+        self.utm_params = utm_params or {}
+        self.subject = subject or self.subject
+        super().__init__(subject=self.subject, **kwargs)
 
-        context = self.get_context_data(**self.context)
-        context |= self.get_utm_params(**utm_params)
+    def get_html(self):
+        """Return the rendered HTML version of the email."""
+        with translation.override(self.language):
+            utm_params = self.get_utm_params(**self.utm_params)
+            context = self.get_context_data(**self.context)
+            context |= utm_params
+            template = self.get_template()
+            subject = self.get_subject(**context)
 
-        with translation.override(language):
-            subject = subject or self.get_subject(**context)
             markdown_string = self.get_markdown_string(template, context, utm_params)
 
-            self.html = self.render_html(
+            return self.render_html(
                 markdown_string=markdown_string,
                 context={
                     "subject": subject,
@@ -70,12 +81,19 @@ class MarkdownEmail(EmailMultiAlternatives):
                 },
             )
 
-            parser = utils.HTML2TextParser()
-            parser.feed(self.html)
-            lines = str(parser).split("\n")
-            body = "\n".join(lines[1:]).strip()  # remove logo
-            super().__init__(subject=subject, body=body, **kwargs)
-            self.attach_alternative(self.html, "text/html")
+    def get_body(self, html):
+        """Return the parsed plain text version of the rendered HTML email."""
+        parser = utils.HTML2TextParser()
+        parser.feed(html)
+        parser.close()
+        return str(parser)
+
+    def message(self):
+        # The connection will call .message while sending the email.
+        self.html = self.get_html()
+        self.body = self.get_body(self.html)
+        self.attach_alternative(self.html, "text/html")
+        return super().message()
 
     @classmethod
     def get_utm_params(cls, **params: {str: str}) -> {str: str}:
@@ -95,22 +113,30 @@ class MarkdownEmail(EmailMultiAlternatives):
             (m.group(0) for m in CLS_NAME_TO_CAMPAIGN_RE.finditer(cls.__qualname__))
         ).upper()
 
-    @staticmethod
-    def update_url_params(url, **params):
-        url_parse = parse.urlparse(url)
-        url_params = dict(parse.parse_qsl(url_parse.query))
+    def update_url_params(self, url, **params):
+        """Add UTM parameters to a URL and add the click tracking URL."""
+        redirect_url_parts = parse.urlparse(url)
+        url_params = dict(parse.parse_qsl(redirect_url_parts.query))
         params.update(url_params)
         url_new_query = parse.urlencode(params)
-        url_parse = url_parse._replace(query=url_new_query)
-        return parse.urlunparse(url_parse)
+        redirect_url_parts = redirect_url_parts._replace(query=url_new_query)
+        redirect_url = parse.urlunparse(redirect_url_parts)
+        if not self._tracking_uuid:
+            return redirect_url
+        tracking_url = reverse("emark:email-click", kwargs={"pk": self._tracking_uuid})
+        tracking_url = parse.urljoin(self.get_side_url(), tracking_url)
+        tracking_url_parts = parse.urlparse(tracking_url)
+        tracking_url_parts = tracking_url_parts._replace(
+            query=parse.urlencode({"url": redirect_url})
+        )
+        return parse.urlunparse(tracking_url_parts)
 
-    @classmethod
-    def set_utm_attributes(cls, md, **utm):
+    def set_utm_attributes(self, md, **utm):
         for url in INLINE_LINK_RE.findall(md):
-            md = md.replace(f"({url})", f"({cls.update_url_params(url, **utm)})")
+            md = md.replace(f"({url})", f"({self.update_url_params(url, **utm)})")
         for url in INLINE_HTML_LINK_RE.findall(md):
             md = md.replace(
-                f'href="{url}"', f'href="{cls.update_url_params(url, **utm)}"'
+                f'href="{url}"', f'href="{self.update_url_params(url, **utm)}"'
             )
         return md
 
@@ -150,8 +176,28 @@ class MarkdownEmail(EmailMultiAlternatives):
             )
         return self.template
 
+    def get_side_url(self):
+        protocol = "https" if settings.SECURE_SSL_REDIRECT else "http"
+        if domain := conf.get_settings().DOMAIN:
+            pass
+        elif apps.is_installed("django.contrib.sites"):
+            from django.contrib.sites.models import Site
+
+            domain = Site.objects.get_current().domain
+
+        return parse.urlunparse((protocol, domain, "", "", "", ""))
+
     def get_context_data(self, **context):
         """Return the context data for the email."""
+        if self._tracking_uuid:
+            context |= {
+                "tracking_uuid": self._tracking_uuid,
+                "tracking_pixel_url": parse.urljoin(
+                    self.get_side_url(),
+                    reverse("emark:email-open", kwargs={"pk": self._tracking_uuid}),
+                ),
+            }
+
         return self.context | context
 
     def get_subject(self, **context):
@@ -167,6 +213,14 @@ class MarkdownEmail(EmailMultiAlternatives):
         markdown_string = self.set_utm_attributes(
             markdown_string, **self.get_utm_params(**utm)
         )
+        if self._tracking_uuid:
+            href = reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid})
+            href = parse.urljoin(self.get_side_url(), href)
+            markdown_string = (
+                f'<a class="open-in-browser" href="{href}">'
+                f'{capfirst(gettext("open in browser"))}'
+                "</a>\n\n"
+            ) + markdown_string
         return markdown_string
 
     def render_html(self, markdown_string, context):

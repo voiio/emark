@@ -302,6 +302,11 @@ hr {
   }
 }
 
+/* Emark tracking */
+.open-in-browser {
+  text-align: right;
+}
+
 /* -------------------------------------
     PRESERVE THESE STYLES IN THE HEAD
 ------------------------------------- */

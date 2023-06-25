@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 
 import pytest
@@ -25,15 +26,6 @@ class TestMarkdownEmail:
         overloaded_template = settings.TEMPLATES.copy()
         overloaded_template[0]["DIRS"] = [BASE_DIR / "tests/templates"]
         settings.TEMPLATES = overloaded_template
-
-    @pytest.fixture
-    def email_message(self):
-        return MarkdownEmailTest(
-            language="en-US",
-            subject="Peanut strikes back",
-            context={"donut_name": "Nutty Donut", "donut_type": "Frosted"},
-            to=["test@example.com"],
-        )
 
     def test_to_user(self):
         user = baker.prepare(
@@ -131,6 +123,7 @@ class TestMarkdownEmail:
         assert email.to == ['"Tony Stark" <ironman@avengers.com>']
 
     def test_email(self, email_message):
+        email_message.message()
         assert email_message.subject == "Peanut strikes back"
 
         assert (
@@ -172,11 +165,45 @@ class TestMarkdownEmail:
         assert received_email.alternatives
 
     def test_body(self, email_message):
+        email_message.message()
         message_text = (
             "Description\n\n*Type: Frosted*\n\nVanilla lollipop "
             "biscuit cake marzipan jelly.\n\n"
         )
         assert message_text in email_message.body
+
+    def test_open_tracking(self, email_message):
+        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        email_message.message()
+        assert (
+            'background-image: url("http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open.jpeg")'
+            in email_message.html
+        )
+
+    def test_open_in_browser__body(self, email_message):
+        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        email_message.message()
+        assert (
+            "Open in browser <http://www.example.com/emark/12341234-1234-1234-1234-123412341234/>"
+            in email_message.body
+        )
+
+    def test_open_in_browser__html(self, email_message):
+        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        email_message.message()
+        assert (
+            '<a class="open-in-browser" href="http://www.example.com/emark/12341234-1234-1234-1234-123412341234/" style="color:#3498db; text-decoration:underline; text-align:right" align="right">'
+            in email_message.html
+        )
+
+    def test_get_site_domain__setting(self, email_message):
+        assert email_message.get_side_url() == "http://www.example.com"
+
+    @pytest.mark.django_db
+    def test_test_get_site_domain__sites_framework(self, email_message, settings):
+        settings.EMARK = {"DOMAIN": None}
+        settings.SITE_ID = 1
+        assert email_message.get_side_url() == "http://example.com"
 
     def test_custom_context(self):
         custom_context = {"donut_name": "HoneyNuts", "donut_type": "Honey"}
@@ -191,19 +218,21 @@ class TestMarkdownEmail:
         }
 
     def test_get_template(self):
+        msg = emark.message.MarkdownEmail(
+            language="en-US",
+            subject="Peanut strikes back",
+        )
         with pytest.raises(ImproperlyConfigured):
-            emark.message.MarkdownEmail(
-                language="en-US",
-                subject="Peanut strikes back",
-            )
+            msg.message()
 
     def test_get_subject__missing(self):
+        msg = emark.message.MarkdownEmail(
+            template="template.md",
+            language="en-US",
+            context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
+        )
         with pytest.raises(ImproperlyConfigured) as e:
-            emark.message.MarkdownEmail(
-                template="template.md",
-                language="en-US",
-                context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
-            )
+            msg.message()
         assert str(e.value) == "MarkdownEmail is missing a subject."
 
     def test_get_subject(self):
@@ -218,6 +247,7 @@ class TestMarkdownEmail:
             language="en-US",
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
+        email_message.message()
         assert (
             "This is a link! <https://www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
@@ -240,9 +270,9 @@ class TestMarkdownEmail:
             "utm_source": "website",
         }
 
-    def test_update_url_params(self):
+    def test_update_url_params(self, email_message):
         assert (
-            MarkdownEmailTestWithSubject.update_url_params(
+            email_message.update_url_params(
                 "https://localhost:8080/?utm_source=foo",
                 utm_source="bar",
                 utm_medium="baz",
@@ -250,8 +280,26 @@ class TestMarkdownEmail:
             == "https://localhost:8080/?utm_source=foo&utm_medium=baz"
         )
         assert (
-            MarkdownEmailTestWithSubject.update_url_params(
+            email_message.update_url_params(
                 "https://localhost:8080", utm_source="bar", utm_medium="baz"
             )
             == "https://localhost:8080?utm_source=bar&utm_medium=baz"
         )
+
+    def test_update_url_params__tracking_uuid(self, email_message):
+        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        assert (
+            email_message.update_url_params(
+                "https://localhost:8080/?utm_source=foo",
+                utm_medium="baz",
+            )
+            == "http://www.example.com/emark/12341234-1234-1234-1234-123412341234/click?url=https%3A%2F%2Flocalhost%3A8080%2F%3Futm_medium%3Dbaz%26utm_source%3Dfoo"
+        )
+
+    @pytest.mark.django_db
+    def test_deepcopy(self, email_message):
+        clone = copy.deepcopy(email_message)
+        assert clone is not email_message
+        clone.message()
+        email_message.message()
+        assert clone.body == email_message.body

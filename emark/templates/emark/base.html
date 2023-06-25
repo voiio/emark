@@ -6,7 +6,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>{{ subject }}</title>
     {% block styles %}
-      <style>{% include "emark/styles.css" %}</style>
+      <style>
+        {% include "emark/styles.css" %}
+        {% if tracking_pixel_url %}
+          .main {
+            background-image: url("{{ tracking_pixel_url }}");
+          }
+        {% endif %}
+      </style>
     {% endblock styles %}
   </head>
   <body>

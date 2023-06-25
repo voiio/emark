@@ -9,6 +9,7 @@ def get_settings():
         (),
         {
             "UTM_PARAMS": {"utm_source": "website", "utm_medium": "email"},
+            "DOMAIN": None,
             **getattr(settings, "EMARK", {}),
         },
     )
