@@ -122,8 +122,8 @@ class MyMessage(MarkdownEmail):
 Django eMark comes with built-in tracking for sent, open and click events.
 The tracking is done via a tracking pixel and a redirect view.
 
-As an added bonus, this feature also comes with an open-in-browser link, that
-allows the user to view the email in their browser, if their email client does
+As an added bonus, this feature also comes with an open-in-browser link that
+allows the user to view the email in their browser if their email client does
 not support HTML emails.
 
 This feature is disabled by default. To enable it, you need to use a separate email
