@@ -197,13 +197,13 @@ class TestMarkdownEmail:
         )
 
     def test_get_site_domain__setting(self, email_message):
-        assert email_message.get_side_url() == "http://www.example.com"
+        assert email_message.get_site_url() == "http://www.example.com"
 
     @pytest.mark.django_db
     def test_test_get_site_domain__sites_framework(self, email_message, settings):
         settings.EMARK = {"DOMAIN": None}
         settings.SITE_ID = 1
-        assert email_message.get_side_url() == "http://example.com"
+        assert email_message.get_site_url() == "http://example.com"
 
     def test_custom_context(self):
         custom_context = {"donut_name": "HoneyNuts", "donut_type": "Honey"}

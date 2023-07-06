@@ -126,7 +126,7 @@ As an added bonus, this feature also comes with an open-in-browser link, that
 allows the user to view the email in their browser, if their email client does
 not support HTML emails.
 
-This feature is disabled by default. To enable it, need to use a separate email
+This feature is disabled by default. To enable it, you need to use a separate email
 backend. This backend will send the email via SMTP and also add the tracking
 pixel and redirect view. However, it will send a separate email for each
 recipient, which may not be desirable in all cases.
@@ -158,7 +158,7 @@ EMARK = {
 }
 ```
 
-If the site framework is installed and no settings is provided,
+If the site framework is installed and no settings are provided,
 the domain will be automatically set to the current site's domain.
 
 The tracking data is stored in the database. You need to run migrations to

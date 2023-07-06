@@ -124,7 +124,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         if not self._tracking_uuid:
             return redirect_url
         tracking_url = reverse("emark:email-click", kwargs={"pk": self._tracking_uuid})
-        tracking_url = parse.urljoin(self.get_side_url(), tracking_url)
+        tracking_url = parse.urljoin(self.get_site_url(), tracking_url)
         tracking_url_parts = parse.urlparse(tracking_url)
         tracking_url_parts = tracking_url_parts._replace(
             query=parse.urlencode({"url": redirect_url})
@@ -176,7 +176,7 @@ class MarkdownEmail(EmailMultiAlternatives):
             )
         return self.template
 
-    def get_side_url(self):
+    def get_site_url(self):
         protocol = "https" if settings.SECURE_SSL_REDIRECT else "http"
         if domain := conf.get_settings().DOMAIN:
             pass
@@ -193,7 +193,7 @@ class MarkdownEmail(EmailMultiAlternatives):
             context |= {
                 "tracking_uuid": self._tracking_uuid,
                 "tracking_pixel_url": parse.urljoin(
-                    self.get_side_url(),
+                    self.get_site_url(),
                     reverse("emark:email-open", kwargs={"pk": self._tracking_uuid}),
                 ),
             }
@@ -215,7 +215,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         )
         if self._tracking_uuid:
             href = reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid})
-            href = parse.urljoin(self.get_side_url(), href)
+            href = parse.urljoin(self.get_site_url(), href)
             markdown_string = (
                 f'<a class="open-in-browser" href="{href}">'
                 f'{capfirst(gettext("open in browser"))}'
