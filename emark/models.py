@@ -5,7 +5,7 @@ from django.urls import reverse
 
 
 class Send(models.Model):
-    """Frozen replica of a send email message."""
+    """Frozen replica of a sent email message."""
 
     uuid = models.UUIDField(
         unique=True, default=uuid.uuid4, editable=False, primary_key=True
