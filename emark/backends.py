@@ -29,7 +29,6 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
     email is sent individually to each address.
     """
 
-
     def _send(self, email_message):
         for recipient in email_message.recipients():
             clone = copy.deepcopy(email_message)

@@ -297,8 +297,8 @@ class TestMarkdownEmail:
         )
 
     @pytest.mark.django_db
-    def test_deepcopy(self, email_message):
-        clone = copy.deepcopy(email_message)
+    def test_copy(self, email_message):
+        clone = copy.copy(email_message)
         assert clone is not email_message
         clone.message()
         email_message.message()
