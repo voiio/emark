@@ -31,7 +31,7 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
 
     def _send(self, email_message):
         for recipient in email_message.recipients():
-            clone = copy.deepcopy(email_message)
+            clone = copy.copy(email_message)
             clone.to = [recipient]
             clone.cc = []
             clone.bcc = []

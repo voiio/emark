@@ -80,7 +80,9 @@ class TestEmailOpenView:
         response = client.get(reverse("emark:email-open", kwargs={"pk": msg.pk}))
         assert response.status_code == 200
         assert response.content
-        assert response["Content-Type"] == "image/jpeg"
+        assert response["Content-Type"] == "image/gif"
+        assert response["Cache-Control"] == "no-cache, no-store, must-revalidate"
+        assert response["Content-Length"] == "43"
 
         email_open = models.Open.objects.get()
         assert email_open.email == msg

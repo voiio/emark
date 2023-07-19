@@ -176,7 +176,7 @@ class TestMarkdownEmail:
         email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
         email_message.message()
         assert (
-            'background-image: url("http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open.jpeg")'
+            'background-image: url("http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open")'
             in email_message.html
         )
 
@@ -184,7 +184,7 @@ class TestMarkdownEmail:
         email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
         email_message.message()
         assert (
-            "Open in browser <http://www.example.com/emark/12341234-1234-1234-1234-123412341234/>"
+            "View in browser <http://www.example.com/emark/12341234-1234-1234-1234-123412341234/>"
             in email_message.body
         )
 

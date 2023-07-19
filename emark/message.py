@@ -69,14 +69,12 @@ class MarkdownEmail(EmailMultiAlternatives):
             context = self.get_context_data(**self.context)
             context |= utm_params
             template = self.get_template()
-            subject = self.get_subject(**context)
 
             markdown_string = self.get_markdown_string(template, context, utm_params)
 
             return self.render_html(
                 markdown_string=markdown_string,
                 context={
-                    "subject": subject,
                     **context,
                 },
             )
@@ -86,10 +84,17 @@ class MarkdownEmail(EmailMultiAlternatives):
         parser = utils.HTML2TextParser()
         parser.feed(html)
         parser.close()
-        return str(parser)
+        body = str(parser)
+        if self._tracking_uuid:
+            href = reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid})
+            href = parse.urljoin(self.get_site_url(), href)
+            txt = capfirst(gettext("view in bowser"))
+            body = f"{txt} <{href}>\n\n" + body
+        return body
 
     def message(self):
         # The connection will call .message while sending the email.
+        self.subject = self.get_subject()
         self.html = self.get_html()
         self.body = self.get_body(self.html)
         self.attach_alternative(self.html, "text/html")
@@ -192,6 +197,10 @@ class MarkdownEmail(EmailMultiAlternatives):
         if self._tracking_uuid:
             context |= {
                 "tracking_uuid": self._tracking_uuid,
+                "view_in_browser_url": parse.urljoin(
+                    self.get_site_url(),
+                    reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid}),
+                ),
                 "tracking_pixel_url": parse.urljoin(
                     self.get_site_url(),
                     reverse("emark:email-open", kwargs={"pk": self._tracking_uuid}),
@@ -200,7 +209,7 @@ class MarkdownEmail(EmailMultiAlternatives):
 
         return self.context | context
 
-    def get_subject(self, **context):
+    def get_subject(self):
         """Return the email's subject."""
         if not self.subject:
             raise ImproperlyConfigured(
@@ -210,18 +219,7 @@ class MarkdownEmail(EmailMultiAlternatives):
 
     def get_markdown_string(self, template, context, utm):
         markdown_string = loader.get_template(template).render(context)
-        markdown_string = self.set_utm_attributes(
-            markdown_string, **self.get_utm_params(**utm)
-        )
-        if self._tracking_uuid:
-            href = reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid})
-            href = parse.urljoin(self.get_site_url(), href)
-            markdown_string = (
-                f'<a class="open-in-browser" href="{href}">'
-                f'{capfirst(gettext("open in browser"))}'
-                "</a>\n\n"
-            ) + markdown_string
-        return markdown_string
+        return self.set_utm_attributes(markdown_string, **self.get_utm_params(**utm))
 
     def render_html(self, markdown_string, context):
         html_message = markdown.markdown(
