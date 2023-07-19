@@ -48,6 +48,7 @@ class TestMarkdownEmail:
             "short_name": "Peter",
         }
         assert email.language == "fr"
+        assert email.user == user
 
     def test_to_user__no_email(self):
         user = baker.prepare(

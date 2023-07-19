@@ -167,7 +167,7 @@ class MarkdownEmail(EmailMultiAlternatives):
             "short_name": user.get_short_name(),
             "user": user,
         }
-        return cls(
+        obj = cls(
             **{
                 "to": [f'"{user.get_full_name()}" <{user.email}>'],
                 "context": context,
@@ -175,6 +175,8 @@ class MarkdownEmail(EmailMultiAlternatives):
             }
             | kwargs
         )
+        obj.user = user
+        return obj
 
     def get_template(self):
         if not self.template:

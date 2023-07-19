@@ -3,6 +3,7 @@
 import uuid
 
 import django.db.models.deletion
+from django.conf import settings
 from django.db import migrations, models
 
 
@@ -23,6 +24,15 @@ class Migration(migrations.Migration):
                         primary_key=True,
                         serialize=False,
                         unique=True,
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="emark_emails",
+                        to=settings.AUTH_USER_MODEL,
                     ),
                 ),
                 ("from_address", models.EmailField(max_length=254)),

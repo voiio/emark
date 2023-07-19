@@ -58,6 +58,7 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
                     subject=message["Subject"],
                     body=clone.body,
                     html=clone.html,
+                    user=getattr(clone, "user", None),
                     utm=clone.get_utm_params(**clone.utm_params),
                 )
         return True

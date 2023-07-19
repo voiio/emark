@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.db import models
 from django.urls import reverse
 
@@ -9,6 +10,13 @@ class Send(models.Model):
 
     uuid = models.UUIDField(
         unique=True, default=uuid.uuid4, editable=False, primary_key=True
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="emark_emails",
+        null=True,
     )
     from_address = models.EmailField()
     to_address = models.EmailField()

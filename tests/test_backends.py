@@ -39,6 +39,22 @@ class TestTrackingSMTPEmailBackend:
         assert str(obj.uuid) in obj.body
 
     @pytest.mark.django_db
+    def test_send(self, admin_user, email_message):
+        email_message.to = [admin_user.email]
+        email_message.user = admin_user
+
+        class TestBackend(backends.TrackingSMTPEmailBackend):
+            connection_class = MagicMock
+
+        backend = TestBackend(fail_silently=False)
+        backend.connection = Mock()
+        assert backend.send_messages([email_message]) == 1
+        assert backend.connection.sendmail.call_count == 1
+        assert Send.objects.count() == 1
+        obj = Send.objects.get(to_address=admin_user.email)
+        assert obj.user == admin_user
+
+    @pytest.mark.django_db
     def test_send__smtp_error(self, email_message):
         email_message.to = [
             "peter.parker@avengers.com",
