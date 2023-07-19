@@ -264,7 +264,7 @@ class TestMarkdownEmail:
         )
 
     def test_get_utm_params(self):
-        assert MarkdownEmailTestWithSubject.get_utm_params() == {
+        assert MarkdownEmailTestWithSubject(language="en").get_utm_params() == {
             "utm_campaign": "MARKDOWN_EMAIL_TEST_WITH_SUBJECT",
             "utm_medium": "email",
             "utm_source": "website",

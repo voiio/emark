@@ -65,16 +65,18 @@ class MarkdownEmail(EmailMultiAlternatives):
     def get_html(self):
         """Return the rendered HTML version of the email."""
         with translation.override(self.language):
-            utm_params = self.get_utm_params(**self.utm_params)
-            context = self.get_context_data(**self.context)
+            utm_params = self.get_utm_params()
+            context = self.get_context_data(**utm_params)
             context |= utm_params
             template = self.get_template()
+            subject = self.get_subject(**context)
 
             markdown_string = self.get_markdown_string(template, context, utm_params)
 
             return self.render_html(
                 markdown_string=markdown_string,
                 context={
+                    "subject": subject,
                     **context,
                 },
             )
@@ -94,20 +96,20 @@ class MarkdownEmail(EmailMultiAlternatives):
 
     def message(self):
         # The connection will call .message while sending the email.
-        self.subject = self.get_subject()
+        self.subject = self.get_subject(**self.get_context_data())
         self.html = self.get_html()
         self.body = self.get_body(self.html)
         self.attach_alternative(self.html, "text/html")
         return super().message()
 
-    @classmethod
-    def get_utm_params(cls, **params: {str: str}) -> {str: str}:
+    def get_utm_params(self, **params: {str: str}) -> {str: str}:
         """Return a dictionary of UTM parameters."""
         return (
             conf.get_settings().UTM_PARAMS
             | {
-                "utm_campaign": cls.get_utm_campaign_name(),
+                "utm_campaign": self.get_utm_campaign_name(),
             }
+            | self.utm_params
             | params
         )
 
@@ -209,7 +211,7 @@ class MarkdownEmail(EmailMultiAlternatives):
 
         return self.context | context
 
-    def get_subject(self):
+    def get_subject(self, **context):
         """Return the email's subject."""
         if not self.subject:
             raise ImproperlyConfigured(
