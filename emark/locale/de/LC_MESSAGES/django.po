@@ -1,0 +1,18 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-19 19:50+0200\n"
+"PO-Revision-Date: 2021-03-14 11:34+0100\n"
+"Last-Translator: Johannes Maron <johannes@maron.family>\n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.4.2\n"
+
+#: message.py:93 templates/emark/base.html:50
+msgid "view in browser"
+msgstr "im Browser ansehen"

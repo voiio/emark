@@ -90,7 +90,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         if self._tracking_uuid:
             href = reverse("emark:email-detail", kwargs={"pk": self._tracking_uuid})
             href = parse.urljoin(self.get_site_url(), href)
-            txt = capfirst(gettext("view in bowser"))
+            txt = capfirst(gettext("view in browser"))
             body = f"{txt} <{href}>\n\n" + body
         return body
 
