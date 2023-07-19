@@ -76,7 +76,7 @@ table td {
 .wrapper {
   box-sizing: border-box;
   padding: 20px;
-  padding-top: 0;
+  padding-top: 10px; /* accommodate view-in-browser url */
 }
 
 .content-block {
