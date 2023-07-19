@@ -29,8 +29,6 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
     email is sent individually to each address.
     """
 
-    def send_messages(self, email_messages):
-        return super().send_messages(email_messages)
 
     def _send(self, email_message):
         for recipient in email_message.recipients():
