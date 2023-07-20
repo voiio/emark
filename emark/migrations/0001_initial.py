@@ -88,7 +88,7 @@ class Migration(migrations.Migration):
                 ("headers", models.JSONField(default=dict)),
                 ("ip_address", models.GenericIPAddressField()),
                 ("utm", models.JSONField(default=dict)),
-                ("redirect_url", models.URLField()),
+                ("redirect_url", models.TextField()),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "email",

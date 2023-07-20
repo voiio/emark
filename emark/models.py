@@ -63,7 +63,8 @@ class Click(ClientTrackingModelMixin):
     """Record of a click on a link in an email."""
 
     email = models.ForeignKey(Send, on_delete=models.CASCADE)
-    redirect_url = models.URLField()
+    # we don't need validation here, but we do need to store long URLs
+    redirect_url = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
 
