@@ -1,4 +1,4 @@
-"""Extends flit_core.buildapi to compile gettext translations before building wheels."""
+"""Extends flit_scm to compile gettext translations before building wheels."""
 
 import glob
 import subprocess  # nosec

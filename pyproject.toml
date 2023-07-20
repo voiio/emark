@@ -65,6 +65,7 @@ DJANGO_SETTINGS_MODULE = "tests.testapp.settings"
 
 [tool.coverage.run]
 source = ["emark"]
+omit = ["emark/buildapi.py"]
 
 [tool.coverage.report]
 show_missing = true
