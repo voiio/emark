@@ -76,6 +76,7 @@ table td {
 .wrapper {
   box-sizing: border-box;
   padding: 20px;
+  padding-top: 10px; /* accommodate view-in-browser url */
 }
 
 .content-block {
@@ -300,6 +301,11 @@ hr {
     max-width: 100% !important;
     width: auto !important;
   }
+}
+
+/* Emark tracking */
+.open-in-browser {
+  text-align: right;
 }
 
 /* -------------------------------------

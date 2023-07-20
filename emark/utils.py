@@ -119,7 +119,7 @@ class HTML2TextParser(HTMLParser):
     def __str__(self) -> str:
         # remove leading/trailing whitespace
         lines = str(self.root).strip().split("\n")
-        text = "\n".join(line.strip() for line in lines)
+        text = "\n".join(line.strip().strip("\ufeff") for line in lines)
         # sanitize all wide vertical or horizontal spaces
         text = self.DOUBLE_NEWLINE.sub("\n\n", text.strip())
         return self.DOUBLE_SPACE.sub(" ", text)

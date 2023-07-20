@@ -8,6 +8,7 @@ Markdown template based HTML and text emails for Django.
 * support for HTML and text emails
 * i18n support
 * built-in UTM tracking
+* built-in sent, open and click tracking
 * automatic CSS inliner via [premailer](https://github.com/peterbe/premailer/)
 
 [![PyPi Version](https://img.shields.io/pypi/v/emark.svg)](https://pypi.python.org/pypi/emark/)
@@ -116,6 +117,62 @@ class MyMessage(MarkdownEmail):
 
 ### Tracking
 
+#### Sent, Open & Click Tracking
+
+Django eMark comes with built-in tracking for sent, open and click events.
+The tracking is done via a tracking pixel and a redirect view.
+
+As an added bonus, this feature also comes with an open-in-browser link that
+allows the user to view the email in their browser if their email client does
+not support HTML emails.
+
+This feature is disabled by default. To enable it, you need to use a separate email
+backend. This backend will send the email via SMTP and also add the tracking
+pixel and redirect view. However, it will send a separate email for each
+recipient, which may not be desirable in all cases.
+
+```python
+# settings.py
+EMAIL_BACKEND = "emark.backends.TrackingSMTPEmailBackend"
+```
+
+Furthermore, you need to add the tracking view to your `urls.py`:
+
+```python
+# urls.py
+from django.urls import include, path
+
+urlpatterns = [
+    # … other urls
+    path("emark/", include("emark.urls")),
+]
+```
+
+You will need to provide a domain name for the tracking pixel and redirect view.
+This can be done via the `DOMAIN` setting:
+
+```python
+# settings.py
+EMARK = {
+    "DOMAIN": "example.com"
+}
+```
+
+If the site framework is installed and no settings are provided,
+the domain will be automatically set to the current site's domain.
+
+The tracking data is stored in the database. You need to run migrations to
+create the necessary tables:
+
+```ShellSession
+python3 manage.py migrate
+```
+
+You can analyze the tracking data via the tables `emark_sent`, `emark_open` and
+`emark_click`.
+
+#### UTM Tracking
+
 Every `MarkdownEmail` subclass comes with automatic UTM tracking.
 UTM parameters are added to all links in the email. Existing UTM params on link
 that have been explicitly set, are not overridden. The default parameters are:
@@ -129,9 +186,11 @@ which is a dictionary of parameters:
 
 ```python
 # settings.py
-EMARK_UTM_PARAMS = {
-    "utm_source": "website",  # default
-    "utm_medium": "email",  # default
+EMARK = {
+  "UTM_PARAMS": {
+      "utm_source": "website",  # default
+      "utm_medium": "email",  # default
+  }
 }
 ```
 
@@ -159,6 +218,18 @@ class MyMessage(MarkdownEmail):
 # or alternatively during instantiation
 MyMessage(utm_params={"utm_campaign": "my-other-campaign"}).send()
 ```
+
+## Development
+
+Pretty HTML emails are great, unless they spam your console during development.
+To prevent this, you can use the `ConsoleEmailBackend`:
+
+```python
+# settings.py
+EMAIL_BACKEND = "emark.backends.ConsoleEmailBackend"
+```
+
+The `ConsoleEmailBackend` will only print the plain text version of the email.
 
 ## Credits
 

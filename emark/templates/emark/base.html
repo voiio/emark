@@ -34,6 +34,19 @@
                       <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                         <tr>
                           <td>
+                            {% block view_in_browser %}
+                              {% if view_in_browser_url %}
+                                <table border="0" cellpadding="0" cellspacing="0">
+                                  <tr>
+                                    <td align="right">
+                                      <small>
+                                        <a class="open-in-browser" href="{{ view_in_browser_url }}">{% trans 'view in browser'|capfirst %}</a>
+                                      </small>
+                                    </td>
+                                  </tr>
+                                </table>
+                              {% endif %}
+                            {% endblock %}
                             <!-- START ACTUAL CONTENT -->
                             {% spaceless %}
                               {% block content %}{{ markdown_string }}{% endblock %}
@@ -67,5 +80,6 @@
         <td class="container-padding">&#xfeff;</td>
       </tr>
     </table>
+    {% if tracking_pixel_url %}<img src="{{ tracking_pixel_url }}" alt="" width="1" height="1" />{% endif %}
   </body>
 </html>
