@@ -177,7 +177,7 @@ class TestMarkdownEmail:
         email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
         email_message.message()
         assert (
-            'background-image: url("http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open")'
+            '<img src="http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open" alt="" width="1" height="1"'
             in email_message.html
         )
 
