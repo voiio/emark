@@ -1,7 +1,7 @@
 """Extends flit_core.buildapi to compile gettext translations before building wheels."""
 
 import glob
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 
 from flit_scm import buildapi
@@ -14,7 +14,7 @@ def compile_gettext_translations():
     for file in glob.glob(pattern):
         file = Path(file)
         cmd = ["msgfmt", "-c", "-o", file.parent / f"{file.stem}.mo", file]
-        subprocess.check_output(cmd)
+        subprocess.check_output(cmd)  # nosec
 
 
 build_sdist = buildapi.build_sdist
