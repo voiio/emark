@@ -39,7 +39,7 @@ class TestTrackingSMTPEmailBackend:
         assert str(obj.uuid) in obj.body
 
     @pytest.mark.django_db
-    def test_send(self, admin_user, email_message):
+    def test_send__with_user(self, admin_user, email_message):
         email_message.to = [admin_user.email]
         email_message.user = admin_user
 
