@@ -16,8 +16,21 @@ class ConsoleEmailBackend(_EmailBackend):
     """Like the console email backend but only with the plain text body."""
 
     def write_message(self, message):
-        setattr(message, "alternatives", [])
-        return super().write_message(message)
+        msg = message.message()
+        payload_count = len(msg.get_payload())
+        msg.set_payload(msg.get_payload(0))
+        msg_data = msg.as_bytes()
+        charset = (
+            msg.get_charset().get_output_charset() if msg.get_charset() else "utf-8"
+        )
+        msg_data = msg_data.decode(charset)
+        self.stream.write("%s\n" % msg_data)
+        self.stream.write("-" * 79)
+        self.stream.write("\n")
+        if payload_count > 1:
+            self.stream.write(
+                f"{payload_count - 1} more attachment(s) have been omitted.\n"
+            )
 
 
 class TrackingSMTPEmailBackend(_SMTPEmailBackend):

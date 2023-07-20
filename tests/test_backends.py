@@ -11,11 +11,13 @@ from emark.models import Send
 
 class TestConsoleEmailBackend:
     def test_write_message(self):
-        msg = EmailMultiAlternatives()
+        msg = EmailMultiAlternatives(body="foo")
         msg.attach_alternative("<html></html>", "text/html")
         with io.StringIO() as stream:
             backends.ConsoleEmailBackend(stream=stream).write_message(msg)
-            assert "html" not in stream.getvalue()
+            stdout = stream.getvalue()
+            assert "html" not in stdout
+            assert "1 more attachment(s) have been omitted." in stdout
 
 
 class TestTrackingSMTPEmailBackend:
