@@ -24,8 +24,12 @@ class EmailDetailView(SingleObjectMixin, View):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
+        if self.object.html:
+            return http.HttpResponse(
+                self.object.html.encode(), status=200, content_type="text/html"
+            )
         return http.HttpResponse(
-            self.object.html.encode(), status=200, content_type="text/html"
+            self.object.body.encode(), status=200, content_type="text/plain"
         )
 
 

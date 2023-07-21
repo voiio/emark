@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ("to_address", models.EmailField(max_length=254)),
                 ("subject", models.TextField(max_length=998)),
                 ("body", models.TextField()),
-                ("html", models.TextField()),
+                ("html", models.TextField(null=True)),
                 ("utm", models.JSONField(default=dict)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
             ],

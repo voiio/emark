@@ -14,6 +14,14 @@ class TestEmailDetailView:
         msg = baker.make("emark.Send")
         response = client.get(msg.get_absolute_url())
         assert response.status_code == 200
+        assert response.content == msg.body.encode("utf-8")
+        assert response["Content-Type"] == "text/plain"
+
+    @pytest.mark.django_db
+    def test_get__html(self, client):
+        msg = baker.make("emark.Send", html="<html></html>")
+        response = client.get(msg.get_absolute_url())
+        assert response.status_code == 200
         assert response.content == msg.html.encode("utf-8")
         assert response["Content-Type"] == "text/html"
 

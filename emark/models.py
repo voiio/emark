@@ -22,7 +22,7 @@ class Send(models.Model):
     to_address = models.EmailField()
     subject = models.TextField(max_length=998)  # RFC 2822
     body = models.TextField()
-    html = models.TextField()
+    html = models.TextField(null=True)
     utm = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
 
