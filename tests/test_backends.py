@@ -76,7 +76,26 @@ class TestTrackingSMTPEmailBackend:
         assert not Send.objects.exists()
 
     @pytest.mark.django_db
-    def test_send__fail_silently(self, email_message):
+    def test_send__fail_silently_wo_error(self, email_message):
+        email_message.to = [
+            "peter.parker@avengers.com",
+            "dr.strange@avengers.com",
+        ]
+        email_message.cc = ["t-dog@avengers.com"]
+
+        class TestBackend(backends.TrackingSMTPEmailBackend):
+            connection_class = MagicMock
+
+        backend = TestBackend(fail_silently=True)
+        backend.connection = Mock()
+        assert backend.send_messages([email_message]) == 1
+        assert backend.connection.sendmail.call_count == 3
+        assert Send.objects.count() == 3
+        obj = Send.objects.get(to_address="peter.parker@avengers.com")
+        assert str(obj.uuid) in obj.body
+
+    @pytest.mark.django_db
+    def test_send__fail_silently_w_error(self, email_message):
         email_message.to = [
             "peter.parker@avengers.com",
             "dr.strange@avengers.com",

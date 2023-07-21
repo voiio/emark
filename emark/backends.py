@@ -42,6 +42,13 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
     email is sent individually to each address.
     """
 
+    def send_messages(self, email_messages):
+        self._messages_sent = []
+        try:
+            return super().send_messages(email_messages)
+        finally:
+            models.Send.objects.bulk_create(self._messages_sent)
+
     def _send(self, email_message):
         for recipient in email_message.recipients():
             clone = copy.copy(email_message)
@@ -64,14 +71,16 @@ class TrackingSMTPEmailBackend(_SMTPEmailBackend):
                     raise
                 return False
             else:
-                models.Send.objects.create(
-                    pk=clone._tracking_uuid,
-                    from_address=from_email,
-                    to_address=recipient,
-                    subject=message["Subject"],
-                    body=clone.body,
-                    html=clone.html,
-                    user=getattr(clone, "user", None),
-                    utm=clone.get_utm_params(**clone.utm_params),
+                self._messages_sent.append(
+                    models.Send(
+                        pk=clone._tracking_uuid,
+                        from_address=from_email,
+                        to_address=recipient,
+                        subject=message["Subject"],
+                        body=clone.body,
+                        html=clone.html,
+                        user=getattr(clone, "user", None),
+                        utm=clone.get_utm_params(**clone.utm_params),
+                    )
                 )
         return True
