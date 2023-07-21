@@ -95,12 +95,16 @@ class MarkdownEmail(EmailMultiAlternatives):
         return body
 
     def message(self):
+        self.render()
+        return super().message()
+
+    def render(self):
         # The connection will call .message while sending the email.
         self.subject = self.get_subject(**self.get_context_data())
         self.html = self.get_html()
         self.body = self.get_body(self.html)
         self.attach_alternative(self.html, "text/html")
-        return super().message()
+        return self.html
 
     def get_utm_params(self, **params: {str: str}) -> {str: str}:
         """Return a dictionary of UTM parameters."""
