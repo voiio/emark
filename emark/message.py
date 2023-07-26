@@ -117,8 +117,13 @@ class MarkdownEmail(EmailMultiAlternatives):
         redirect_url = parse.urlunparse(redirect_url_parts)
         if not self.uuid:
             return redirect_url
+        site_url = self.get_site_url()
+        # external links should not be tracked
+        top_level_domain = ".".join(site_url.split(".")[-2:])
+        if not redirect_url_parts.netloc.endswith(top_level_domain):
+            return redirect_url
         tracking_url = reverse("emark:email-click", kwargs={"pk": self.uuid})
-        tracking_url = parse.urljoin(self.get_site_url(), tracking_url)
+        tracking_url = parse.urljoin(site_url, tracking_url)
         tracking_url_parts = parse.urlparse(tracking_url)
         tracking_url_parts = tracking_url_parts._replace(
             query=parse.urlencode({"url": redirect_url})
