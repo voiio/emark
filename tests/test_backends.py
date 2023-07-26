@@ -89,7 +89,7 @@ class TestTrackingSMTPEmailBackend:
 
         backend = TestBackend(fail_silently=False)
         backend.connection = Mock()
-        assert backend.send_messages([email_message]) == 1
+        assert backend.send_messages([email_message]) == 3
         assert backend.connection.sendmail.call_count == 3
         assert Send.objects.count() == 3
         obj = Send.objects.get(to_address="peter.parker@avengers.com")
@@ -111,7 +111,7 @@ class TestTrackingSMTPEmailBackend:
 
         backend = TestBackend(fail_silently=False)
         backend.connection = Mock()
-        assert backend.send_messages([email_message]) == 1
+        assert backend.send_messages([email_message]) == 3
         assert backend.connection.sendmail.call_count == 3
         assert Send.objects.count() == 3
 
@@ -163,7 +163,7 @@ class TestTrackingSMTPEmailBackend:
 
         backend = TestBackend(fail_silently=True)
         backend.connection = Mock()
-        assert backend.send_messages([email_message]) == 1
+        assert backend.send_messages([email_message]) == 3
         assert backend.connection.sendmail.call_count == 3
         assert Send.objects.count() == 3
         obj = Send.objects.get(to_address="peter.parker@avengers.com")
@@ -184,5 +184,5 @@ class TestTrackingSMTPEmailBackend:
         backend.connection = Mock()
         backend.connection.sendmail.side_effect = smtplib.SMTPException
         assert backend.send_messages([email_message]) == 0
-        assert backend.connection.sendmail.call_count == 1
+        assert backend.connection.sendmail.call_count == 3
         assert not Send.objects.exists()

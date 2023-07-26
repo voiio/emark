@@ -1,5 +1,4 @@
 import copy
-import smtplib
 import uuid
 
 from django.conf import settings
@@ -100,27 +99,34 @@ class TrackingSMTPEmailBackend(TrackingEmailBackendMixin, _SMTPEmailBackend):
     email is sent individually to each address.
     """
 
-    def _send(self, email_message):
+    def send_messages(self, email_messages):
+        # render all messages first, then send them
+        all_messages = []
+        for email_message in email_messages:
+            clones = self._get_trackable_clones(email_message)
+            all_messages.extend(clones)
+        return super().send_messages(all_messages)
+
+    def _get_trackable_clones(self, email_message):
+        tracked_messages = []
         for recipient in email_message.recipients():
             clone = copy.copy(email_message)
-            clone.to = [recipient]
+            encoding = clone.encoding or settings.DEFAULT_CHARSET
+            clone.to = [sanitize_address(recipient, encoding)]
             clone.cc = []
             clone.bcc = []
             # enable tracking
             clone._tracking_uuid = uuid.uuid4()
 
-            encoding = clone.encoding or settings.DEFAULT_CHARSET
-            from_email = sanitize_address(clone.from_email, encoding)
-            recipients = [sanitize_address(recipient, encoding)]
-            message = clone.message()
-            try:
-                self.connection.sendmail(
-                    from_email, recipients, message.as_bytes(linesep="\r\n")
-                )
-            except smtplib.SMTPException:
-                if not self.fail_silently:
-                    raise
-                return False
-            else:
-                self._track_message_clone(clone, message)
-        return True
+            clone.from_email = sanitize_address(clone.from_email, encoding)
+            # explicitly render the message before sending
+            clone.message()
+            tracked_messages.append(clone)
+        return tracked_messages
+
+    def _send(self, email_message):
+        was_sent = super()._send(email_message)
+        if was_sent:
+            self._track_message_clone(email_message, email_message.message())
+            return True
+        return False
