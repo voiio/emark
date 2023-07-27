@@ -52,9 +52,33 @@ class TestEmailClickView:
         assert response.status_code == 400
 
     @pytest.mark.django_db
-    def test_get__subdomain_redirect_url(self, client, live_server):
+    def test_get__different_schema_redirect_url(self, client, live_server):
+        msg = baker.make("emark.Send")
+        redirect_url = "https://sub.testserver/?utm_source=foo"
+
+        url = reverse("emark:email-click", kwargs={"pk": msg.pk})
+
+        url = f"{url}?{urlencode({'url': redirect_url})}"
+        response = client.get(url)
+        assert response.status_code == 400
+
+    @pytest.mark.django_db
+    def test_get__subdomain_redirect_url(self, client, live_server, settings):
+        settings.ALLOWED_HOSTS = ["testserver", ".testserver"]
         msg = baker.make("emark.Send")
         redirect_url = "http://sub.testserver/?utm_source=foo"
+
+        url = reverse("emark:email-click", kwargs={"pk": msg.pk})
+
+        url = f"{url}?{urlencode({'url': redirect_url})}"
+        response = client.get(url)
+        assert response.status_code == 302
+
+    @pytest.mark.django_db
+    def test_get__subdomain_debug(self, client, live_server, settings):
+        settings.DEBUG = True
+        msg = baker.make("emark.Send")
+        redirect_url = "http://sub.localhost/?utm_source=foo"
 
         url = reverse("emark:email-click", kwargs={"pk": msg.pk})
 
