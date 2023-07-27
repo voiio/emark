@@ -1,5 +1,8 @@
+from urllib.parse import urlparse
+
 from django import http
-from django.utils.http import url_has_allowed_host_and_scheme
+from django.conf import settings
+from django.http.request import validate_host
 from django.views import View
 from django.views.generic.detail import SingleObjectMixin
 
@@ -45,11 +48,8 @@ class EmailClickView(SingleObjectMixin, View):
         # The redirect_to URL is user-provided, so it might be malicious
         # or malformed. We use Django's URL validation to ensure that it
         # is safe to redirect to.
-        if not url_has_allowed_host_and_scheme(
-            url=redirect_to,
-            allowed_hosts=request.get_host(),
-            require_https=request.is_secure(),
-        ):
+        host = urlparse(redirect_to).netloc
+        if not host or not validate_host(host, settings.ALLOWED_HOSTS):
             return http.HttpResponseBadRequest("Missing url or malformed parameter")
 
         models.Click.objects.create_for_request(
