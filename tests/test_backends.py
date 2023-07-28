@@ -20,6 +20,17 @@ class TestConsoleEmailBackend:
             assert "1 more attachment(s) have been omitted." in stdout
 
 
+class TestSMTPEmailBackend:
+    def test_send(self, email_message):
+        class TestBackend(backends.SMTPEmailBackend):
+            def _send(self, message):
+                return bool(message.html)
+
+        backend = TestBackend(fail_silently=False)
+        backend.connection = Mock()
+        assert backend.send_messages([email_message]) == 1
+
+
 class TestTrackingConsoleEmailBackend:
     @pytest.mark.django_db
     def test_send(self, email_message):
@@ -32,8 +43,8 @@ class TestTrackingConsoleEmailBackend:
         with io.StringIO() as stream:
             backend = backends.TrackingConsoleEmailBackend(stream=stream)
             assert backend.send_messages([email_message]) == 1
-        assert Send.objects.count() == 3
-        obj = Send.objects.get(to_address="peter.parker@avengers.com")
+        assert Send.objects.count() == 1
+        obj = Send.objects.get()
         assert str(obj.uuid) in obj.body
 
     @pytest.mark.django_db
@@ -46,7 +57,7 @@ class TestTrackingConsoleEmailBackend:
             assert backend.send_messages([email_message]) == 1
 
         assert Send.objects.count() == 1
-        obj = Send.objects.get(to_address=admin_user.email)
+        obj = Send.objects.get()
         assert obj.user == admin_user
 
     @pytest.mark.django_db
@@ -69,10 +80,9 @@ class TestTrackingConsoleEmailBackend:
         with io.StringIO() as stream:
             backends.TrackingConsoleEmailBackend(stream=stream).send_messages([msg])
             stdout = stream.getvalue()
-            assert "To: peter.parker@aol.com" in stdout
             assert "To: spiderman@avengers.com" in stdout
-            assert "Cc:" not in stdout
-        assert Send.objects.count() == 2
+            assert "Cc: peter.parker@aol.com" in stdout
+        assert Send.objects.count() == 1
 
 
 class TestTrackingSMTPEmailBackend:
@@ -90,9 +100,9 @@ class TestTrackingSMTPEmailBackend:
         backend = TestBackend(fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
-        assert backend.connection.sendmail.call_count == 3
-        assert Send.objects.count() == 3
-        obj = Send.objects.get(to_address="peter.parker@avengers.com")
+        assert backend.connection.sendmail.call_count == 1
+        assert Send.objects.count() == 1
+        obj = Send.objects.get()
         assert str(obj.uuid) in obj.body
 
     @pytest.mark.django_db
@@ -112,8 +122,8 @@ class TestTrackingSMTPEmailBackend:
         backend = TestBackend(fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
-        assert backend.connection.sendmail.call_count == 3
-        assert Send.objects.count() == 3
+        assert backend.connection.sendmail.call_count == 1
+        assert Send.objects.count() == 1
 
     @pytest.mark.django_db
     def test_send__with_user(self, admin_user, email_message):
@@ -128,7 +138,7 @@ class TestTrackingSMTPEmailBackend:
         assert backend.send_messages([email_message]) == 1
         assert backend.connection.sendmail.call_count == 1
         assert Send.objects.count() == 1
-        obj = Send.objects.get(to_address=admin_user.email)
+        obj = Send.objects.get(to=[admin_user.email])
         assert obj.user == admin_user
 
     @pytest.mark.django_db
@@ -164,9 +174,9 @@ class TestTrackingSMTPEmailBackend:
         backend = TestBackend(fail_silently=True)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
-        assert backend.connection.sendmail.call_count == 3
-        assert Send.objects.count() == 3
-        obj = Send.objects.get(to_address="peter.parker@avengers.com")
+        assert backend.connection.sendmail.call_count == 1
+        assert Send.objects.count() == 1
+        obj = Send.objects.get()
         assert str(obj.uuid) in obj.body
 
     @pytest.mark.django_db

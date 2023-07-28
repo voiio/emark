@@ -18,8 +18,12 @@ class Send(models.Model):
         related_name="emark_emails",
         null=True,
     )
-    from_address = models.EmailField()
-    to_address = models.EmailField()
+    # In RFC 2822 from is a mailbox-list, but Django only support a single
+    from_email = models.TextField(max_length=998)
+    to = models.JSONField(default=list)
+    cc = models.JSONField(default=list)
+    bcc = models.JSONField(default=list)
+    reply_to = models.JSONField(default=list)
     subject = models.TextField(max_length=998)  # RFC 2822
     body = models.TextField()
     html = models.TextField(null=True)
