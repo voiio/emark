@@ -17,14 +17,10 @@ __all__ = [
 
 class RenderEmailBackendMixin:
     def send_messages(self, email_messages):
-        self._messages_sent = []
         for message in email_messages:
             if isinstance(message, MarkdownEmail):
                 message.render()
-        try:
-            return super().send_messages(email_messages)
-        finally:
-            models.Send.objects.bulk_create(self._messages_sent)
+        return super().send_messages(email_messages)
 
 
 class TrackingEmailBackendMixin:
@@ -112,8 +108,10 @@ class TrackingConsoleEmailBackend(
     """Like the console email backend but with click and open tracking."""
 
     def write_message(self, message):
-        self._track_message(message)
-        return super().write_message(message)
+        try:
+            return super().write_message(message)
+        finally:
+            self._track_message(message)
 
 
 class TrackingSMTPEmailBackend(TrackingEmailBackendMixin, _SMTPEmailBackend):
