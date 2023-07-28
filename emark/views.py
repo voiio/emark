@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 
 from django import http
 from django.conf import settings
-from django.http.request import validate_host
+from django.http.request import split_domain_port, validate_host
 from django.views import View
 from django.views.generic.detail import SingleObjectMixin
 
@@ -49,19 +49,18 @@ class EmailClickView(SingleObjectMixin, View):
         # or malformed. We use Django's URL validation to ensure that it
         # is safe to redirect to.
         parsed_url = urlparse(redirect_to)
+        domain, _port = split_domain_port(parsed_url.netloc)
         allowed_hosts = settings.ALLOWED_HOSTS
         if settings.DEBUG:
             allowed_hosts = settings.ALLOWED_HOSTS + [
                 ".localhost",
-                ".localhost:8000",
                 "127.0.0.1",
-                "127.0.0.1:8000",
                 "[::1]",
             ]
         if any(
             [
-                not parsed_url.netloc,
-                not validate_host(parsed_url.netloc, allowed_hosts),
+                not domain,
+                not validate_host(domain, allowed_hosts),
                 request.scheme != parsed_url.scheme,
             ]
         ):
