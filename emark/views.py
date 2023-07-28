@@ -49,6 +49,9 @@ class EmailClickView(SingleObjectMixin, View):
         # or malformed. We use Django's URL validation to ensure that it
         # is safe to redirect to.
         parsed_url = urlparse(redirect_to)
+        if not parsed_url.netloc:
+            return http.HttpResponseBadRequest("Missing url or malformed parameter")
+
         domain, _port = split_domain_port(parsed_url.netloc)
         allowed_hosts = settings.ALLOWED_HOSTS
         if settings.DEBUG:
