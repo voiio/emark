@@ -53,7 +53,9 @@ class EmailClickView(SingleObjectMixin, View):
         if settings.DEBUG:
             allowed_hosts = settings.ALLOWED_HOSTS + [
                 ".localhost",
+                ".localhost:8000",
                 "127.0.0.1",
+                "127.0.0.1:8000",
                 "[::1]",
             ]
         if any(
