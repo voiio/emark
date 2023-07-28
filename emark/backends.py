@@ -1,20 +1,26 @@
-import copy
-import smtplib
 import uuid
 
-from django.conf import settings
+from django.core.mail import EmailMessage
 from django.core.mail.backends.console import EmailBackend as _EmailBackend
 from django.core.mail.backends.smtp import EmailBackend as _SMTPEmailBackend
-from django.core.mail.message import sanitize_address
 
 from emark import models
 from emark.message import MarkdownEmail
 
 __all__ = [
     "ConsoleEmailBackend",
+    "SMTPEmailBackend",
     "TrackingConsoleEmailBackend",
     "TrackingSMTPEmailBackend",
 ]
+
+
+class RenderEmailBackendMixin:
+    def send_messages(self, email_messages):
+        for message in email_messages:
+            if isinstance(message, MarkdownEmail):
+                message.render()
+        return super().send_messages(email_messages)
 
 
 class TrackingEmailBackendMixin:
@@ -22,39 +28,47 @@ class TrackingEmailBackendMixin:
 
     def send_messages(self, email_messages):
         self._messages_sent = []
+        for message in email_messages:
+            if isinstance(message, MarkdownEmail):
+                message.render(tracking_uuid=uuid.uuid4())
         try:
             return super().send_messages(email_messages)
         finally:
             models.Send.objects.bulk_create(self._messages_sent)
 
-    def _track_message_clone(self, clone, message):
-        if isinstance(clone, MarkdownEmail):
+    def _track_message(self, message: EmailMessage):
+        if isinstance(message, MarkdownEmail):
             self._messages_sent.append(
                 models.Send(
-                    pk=clone._tracking_uuid,
-                    from_address=message["From"],
-                    to_address=message["To"],
-                    subject=message["Subject"],
-                    body=clone.body,
-                    html=clone.html,
-                    user=getattr(clone, "user", None),
-                    utm=clone.get_utm_params(**clone.utm_params),
+                    pk=message.uuid,
+                    from_email=message.from_email,
+                    to=message.to,
+                    cc=message.cc,
+                    bcc=message.bcc,
+                    reply_to=message.reply_to,
+                    subject=message.subject,
+                    body=message.body,
+                    html=message.html,
+                    user=getattr(message, "user", None),
+                    utm=message.get_utm_params(),
                 )
             )
         else:
             self._messages_sent.append(
                 models.Send(
-                    pk=clone._tracking_uuid,
-                    from_address=message["From"],
-                    to_address=message["To"],
-                    subject=message["Subject"],
-                    body=clone.body,
+                    from_email=message.from_email,
+                    to=message.to,
+                    cc=message.cc,
+                    bcc=message.bcc,
+                    reply_to=message.reply_to,
+                    subject=message.subject,
+                    body=message.body,
                 )
             )
 
 
-class ConsoleEmailBackend(_EmailBackend):
-    """Like the console email backend but only with the plain text body."""
+class ConsoleEmailBackendMixin:
+    """Drop email alternative parts and attachments for the console backend."""
 
     def write_message(self, message):
         msg = message.message()
@@ -76,19 +90,28 @@ class ConsoleEmailBackend(_EmailBackend):
         return msg
 
 
-class TrackingConsoleEmailBackend(TrackingEmailBackendMixin, ConsoleEmailBackend):
+class ConsoleEmailBackend(
+    RenderEmailBackendMixin, ConsoleEmailBackendMixin, _EmailBackend
+):
+    """Like the console email backend but only with the plain text body."""
+
+
+class SMTPEmailBackend(RenderEmailBackendMixin, _SMTPEmailBackend):
+    """SMTP email backend that renders messages before establishing an SMTP transport."""
+
+    pass
+
+
+class TrackingConsoleEmailBackend(
+    TrackingEmailBackendMixin, ConsoleEmailBackendMixin, _EmailBackend
+):
     """Like the console email backend but with click and open tracking."""
 
     def write_message(self, message):
-        for recipient in message.recipients():
-            clone = copy.copy(message)
-            clone.to = [recipient]
-            clone.cc = []
-            clone.bcc = []
-            # enable tracking
-            clone._tracking_uuid = uuid.uuid4()
-            msg = super().write_message(clone)
-            self._track_message_clone(clone, msg)
+        try:
+            return super().write_message(message)
+        finally:
+            self._track_message(message)
 
 
 class TrackingSMTPEmailBackend(TrackingEmailBackendMixin, _SMTPEmailBackend):
@@ -101,26 +124,10 @@ class TrackingSMTPEmailBackend(TrackingEmailBackendMixin, _SMTPEmailBackend):
     """
 
     def _send(self, email_message):
-        for recipient in email_message.recipients():
-            clone = copy.copy(email_message)
-            clone.to = [recipient]
-            clone.cc = []
-            clone.bcc = []
-            # enable tracking
-            clone._tracking_uuid = uuid.uuid4()
-
-            encoding = clone.encoding or settings.DEFAULT_CHARSET
-            from_email = sanitize_address(clone.from_email, encoding)
-            recipients = [sanitize_address(recipient, encoding)]
-            message = clone.message()
-            try:
-                self.connection.sendmail(
-                    from_email, recipients, message.as_bytes(linesep="\r\n")
-                )
-            except smtplib.SMTPException:
-                if not self.fail_silently:
-                    raise
-                return False
-            else:
-                self._track_message_clone(clone, message)
-        return True
+        sent = False
+        try:
+            sent = super()._send(email_message)
+            return sent
+        finally:
+            if sent:
+                self._track_message(email_message)

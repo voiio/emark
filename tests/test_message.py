@@ -174,24 +174,21 @@ class TestMarkdownEmail:
         assert message_text in email_message.body
 
     def test_open_tracking(self, email_message):
-        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
-        email_message.message()
+        email_message.render("12341234-1234-1234-1234-123412341234")
         assert (
             '<img src="http://www.example.com/emark/12341234-1234-1234-1234-123412341234/open" alt="" width="1" height="1"'
             in email_message.html
         )
 
     def test_open_in_browser__body(self, email_message):
-        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
-        email_message.message()
+        email_message.render("12341234-1234-1234-1234-123412341234")
         assert (
             "View in browser <http://www.example.com/emark/12341234-1234-1234-1234-123412341234/>"
             in email_message.body
         )
 
     def test_open_in_browser__html(self, email_message):
-        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
-        email_message.message()
+        email_message.render("12341234-1234-1234-1234-123412341234")
         assert (
             '<a class="open-in-browser" href="http://www.example.com/emark/12341234-1234-1234-1234-123412341234/" style="color:#3498db; text-decoration:underline; text-align:right" align="right">'
             in email_message.html
@@ -213,7 +210,7 @@ class TestMarkdownEmail:
             subject="Peanut strikes back",
             context=custom_context,
         )
-        assert email_message.get_context_data(**custom_context) == {
+        assert email_message.get_context_data() == {
             "donut_type": "Honey",
             "donut_name": "HoneyNuts",
         }
@@ -224,7 +221,7 @@ class TestMarkdownEmail:
             subject="Peanut strikes back",
         )
         with pytest.raises(ImproperlyConfigured):
-            msg.message()
+            msg.get_template()
 
     def test_get_subject__missing(self):
         msg = emark.message.MarkdownEmail(
@@ -233,7 +230,7 @@ class TestMarkdownEmail:
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
         with pytest.raises(ImproperlyConfigured) as e:
-            msg.message()
+            msg.get_subject()
         assert str(e.value) == "MarkdownEmail is missing a subject."
 
     def test_get_subject(self):
@@ -248,7 +245,7 @@ class TestMarkdownEmail:
             language="en-US",
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
-        email_message.message()
+        email_message.render()
         assert (
             "This is a link! <https://www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
@@ -288,7 +285,7 @@ class TestMarkdownEmail:
         )
 
     def test_update_url_params__tracking_uuid(self, email_message):
-        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        email_message.uuid = "12341234-1234-1234-1234-123412341234"
         assert (
             email_message.update_url_params(
                 "https://localhost:8080/?utm_source=foo",
