@@ -58,8 +58,8 @@ class EmailClickView(SingleObjectMixin, View):
             ]
         if any(
             [
-                not parsed_url.netloc
-                or not validate_host(parsed_url.netloc, allowed_hosts),
+                not parsed_url.netloc,
+                not validate_host(parsed_url.netloc, allowed_hosts),
                 request.scheme != parsed_url.scheme,
             ]
         ):
