@@ -193,6 +193,10 @@ class MarkdownEmail(EmailMultiAlternatives):
             )
         return self.subject % context
 
+    def get_preheader(self):
+        """Return the email's preheader."""
+        return ""
+
     def get_markdown(self, context, utm):
         template = self.get_template()
         markdown_string = loader.get_template(template).render(context)
@@ -243,6 +247,7 @@ class MarkdownEmail(EmailMultiAlternatives):
                 context |= utm_params
                 self.subject = self.get_subject(**context)
                 context["subject"] = self.subject
+                context["preheader"] = self.get_preheader()
                 self.markdown = self.get_markdown(context, utm_params)
                 self.html = self.get_html(
                     markdown_string=self.markdown,
