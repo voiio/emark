@@ -20,6 +20,10 @@ class MarkdownEmailTestWithSubject(MarkdownEmailTest):
     subject = "Which Donut Are You?"
 
 
+class MarkdownEmailTestWithPreheader(MarkdownEmailTest):
+    preheader = "Donuts events are back!"
+
+
 class TestMarkdownEmail:
     @pytest.fixture(autouse=True)
     def _add_test_template(self, settings):
@@ -239,6 +243,21 @@ class TestMarkdownEmail:
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
         assert email_message.subject == "Which Donut Are You?"
+
+    def test_get_preheader__missing(self):
+        msg = emark.message.MarkdownEmail(
+            template="template.md",
+            language="en-US",
+            context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
+        )
+        msg.get_preheader() == ""
+
+    def test_get_preheader(self):
+        email_message = MarkdownEmailTestWithPreheader(
+            language="en-US",
+            context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
+        )
+        assert email_message.preheader == "Donuts events are back!"
 
     def test_set_utm_attributes(self):
         email_message = MarkdownEmailTestWithSubject(
