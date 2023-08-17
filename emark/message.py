@@ -194,7 +194,15 @@ class MarkdownEmail(EmailMultiAlternatives):
         return self.subject % context
 
     def get_preheader(self):
-        """Return the email's preheader."""
+        """
+        Return the email's preheader.
+
+        A brief text that recipients will see in their inbox before opening the email
+        along with the subject. Unless explicitly set, the preheader will be the first
+        paragraph of the email's body.
+        Can be useful to grab the recipient's attention and/or simplify their workflow
+        (e.g. by providing a one-time-password).
+        """
         return ""
 
     def get_markdown(self, context, utm):
