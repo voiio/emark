@@ -3,7 +3,7 @@ import smtplib
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMessage, EmailMultiAlternatives
 
 from emark import backends
 from emark.models import Send
@@ -61,6 +61,17 @@ class TestTrackingConsoleEmailBackend:
         assert obj.user == admin_user
 
     @pytest.mark.django_db
+    def test_send__native_email(self):
+        with io.StringIO() as stream:
+            backend = backends.TrackingConsoleEmailBackend(stream=stream)
+            EmailMessage(
+                to=["peter.parker@avengers.com"],
+                connection=backend,
+            ).send()
+
+        assert Send.objects.count() == 1
+
+    @pytest.mark.django_db
     def test_write_message__native_email(self):
         msg = EmailMultiAlternatives(to=["ironman@avengers.com"], body="foo")
         msg.attach_alternative("<html></html>", "text/html")
@@ -72,7 +83,7 @@ class TestTrackingConsoleEmailBackend:
         assert Send.objects.count() == 1
 
     @pytest.mark.django_db
-    def test_write_message__native_email__multiple_receipients(self):
+    def test_write_message__native_email__multiple_recipients(self):
         msg = EmailMultiAlternatives(
             to=["spiderman@avengers.com"], cc=["peter.parker@aol.com"], body="foo"
         )

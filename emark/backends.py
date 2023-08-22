@@ -73,7 +73,8 @@ class ConsoleEmailBackendMixin:
     def write_message(self, message):
         msg = message.message()
         payload_count = len(msg.get_payload())
-        msg.set_payload(msg.get_payload(0))
+        if payload_count > 1:
+            msg.set_payload(msg.get_payload(0))
         msg_data = msg.as_bytes()
         charset = (
             msg.get_charset().get_output_charset() if msg.get_charset() else "utf-8"
