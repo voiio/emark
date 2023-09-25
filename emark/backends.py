@@ -72,8 +72,9 @@ class ConsoleEmailBackendMixin:
 
     def write_message(self, message):
         msg = message.message()
-        payload_count = len(msg.get_payload())
-        if payload_count > 1:
+        original_payload = msg.get_payload()
+        payload_count = len(original_payload)
+        if isinstance(original_payload, list):
             msg.set_payload(msg.get_payload(0))
         msg_data = msg.as_bytes()
         charset = (
