@@ -3,4 +3,4 @@ black==23.9.1
 flake8==6.1.0
 isort==5.12.0
 pydocstyle[toml]==6.3.0
-djlint==1.33.0
+djlint==1.34.0
