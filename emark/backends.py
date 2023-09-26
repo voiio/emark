@@ -74,8 +74,10 @@ class ConsoleEmailBackendMixin:
         msg = message.message()
         original_payload = msg.get_payload()
         payload_count = len(original_payload)
-        if isinstance(original_payload, list):
-            msg.set_payload(msg.get_payload(0))
+        if not msg.is_multipart():
+            return super().write_message(message)
+
+        msg.set_payload(msg.get_payload(0))
         msg_data = msg.as_bytes()
         charset = (
             msg.get_charset().get_output_charset() if msg.get_charset() else "utf-8"
