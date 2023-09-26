@@ -10,14 +10,14 @@ from emark.models import Send
 
 
 class TestConsoleEmailBackend:
-    def test_write_message(self):
+    def test_write_message__single(self):
         msg = EmailMessage(body="foo\nbar")
         with io.StringIO() as stream:
             backends.ConsoleEmailBackend(stream=stream).write_message(msg)
             stdout = stream.getvalue()
             assert "foo\nbar" in stdout
 
-    def test_write_message__multi_alternatives(self):
+    def test_write_message__multipart(self):
         msg = EmailMultiAlternatives(body="foo")
         msg.attach_alternative("<html></html>", "text/html")
         with io.StringIO() as stream:
