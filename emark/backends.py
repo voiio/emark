@@ -1,7 +1,7 @@
 import uuid
 
 from django.core.mail import EmailMessage
-from django.core.mail.backends.console import EmailBackend as _EmailBackend
+from django.core.mail.backends.console import EmailBackend as _ConsoleEmailBackend
 from django.core.mail.backends.smtp import EmailBackend as _SMTPEmailBackend
 
 from emark import models
@@ -72,11 +72,11 @@ class ConsoleEmailBackendMixin:
 
     def write_message(self, message):
         msg = message.message()
-        original_payload = msg.get_payload()
-        payload_count = len(original_payload)
         if not msg.is_multipart():
             return super().write_message(message)
 
+        original_payload = msg.get_payload()
+        payload_count = len(original_payload)
         msg.set_payload(msg.get_payload(0))
         msg_data = msg.as_bytes()
         charset = (
@@ -95,7 +95,7 @@ class ConsoleEmailBackendMixin:
 
 
 class ConsoleEmailBackend(
-    RenderEmailBackendMixin, ConsoleEmailBackendMixin, _EmailBackend
+    RenderEmailBackendMixin, ConsoleEmailBackendMixin, _ConsoleEmailBackend
 ):
     """Like the console email backend but only with the plain text body."""
 
@@ -107,7 +107,7 @@ class SMTPEmailBackend(RenderEmailBackendMixin, _SMTPEmailBackend):
 
 
 class TrackingConsoleEmailBackend(
-    TrackingEmailBackendMixin, ConsoleEmailBackendMixin, _EmailBackend
+    TrackingEmailBackendMixin, ConsoleEmailBackendMixin, _ConsoleEmailBackend
 ):
     """Like the console email backend but with click and open tracking."""
 
