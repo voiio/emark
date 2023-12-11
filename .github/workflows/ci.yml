@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt install -y gettext
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
       - run: python -m pip install --upgrade pip build wheel twine
@@ -36,7 +36,7 @@ jobs:
           - djlint emark --reformat
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
           cache: 'pip'
@@ -65,7 +65,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: sudo apt install -y gettext
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - run: python -m pip install .[${{ matrix.extras }}]
