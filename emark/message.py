@@ -14,8 +14,6 @@ from django.template import loader
 from django.urls import reverse
 from django.utils import translation
 from django.utils.safestring import mark_safe
-from django.utils.text import capfirst
-from django.utils.translation import gettext
 
 from emark import conf, utils
 
@@ -237,13 +235,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         parser = utils.HTML2TextParser()
         parser.feed(html)
         parser.close()
-        body = str(parser)
-        if self.uuid:
-            href = reverse("emark:email-detail", kwargs={"pk": self.uuid})
-            href = parse.urljoin(self.get_site_url(), href)
-            txt = capfirst(gettext("view in browser"))
-            body = f"{txt} <{href}>\n\n" + body
-        return body
+        return str(parser)
 
     def render(self, tracking_uuid=None):
         """Render the email."""
