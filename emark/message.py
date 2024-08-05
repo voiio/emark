@@ -226,7 +226,7 @@ class MarkdownEmail(EmailMultiAlternatives):
             html=rendered_html,
             strip_important=False,
             keep_style_tags=True,
-            cssutils_logging_level=logging.ERROR,
+            cssutils_logging_level=logging.INFO,
         )
         return inlined_html
 
