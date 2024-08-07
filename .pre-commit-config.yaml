@@ -1,0 +1,37 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: check-merge-conflict
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: name-tests-test
+        args: ['--pytest-test-first']
+      - id: no-commit-to-branch
+        args: [--branch, main]
+      - id: detect-private-key
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        language: system
+        entry: ruff check
+        types: [python]
+        args: [--fix, --exit-non-zero-on-fix]
+
+      - id: black
+        name: black
+        language: system
+        entry: black
+        types: [python]
+
+      - id: djlint
+        name: djlint
+        language: system
+        entry: djlint
+        types: [ html ]
+        args: [ --reformat, --profile, "django" ]
