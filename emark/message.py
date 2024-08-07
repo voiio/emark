@@ -25,8 +25,7 @@ CLS_NAME_TO_CAMPAIGN_RE = re.compile(
 
 
 class MarkdownEmail(EmailMultiAlternatives):
-    """
-    Multipart email message that renders both plaintext and HTML from markdown.
+    """Multipart email message that renders both plaintext and HTML from markdown.
 
     This is a full class:`EmailMultiAlternatives` subclass with additional support
     to send emails directly to a users. It also requires an explicit language
@@ -102,7 +101,7 @@ class MarkdownEmail(EmailMultiAlternatives):
     def get_utm_campaign_name(cls):
         """Return the UTM campaign name for this email."""
         return "_".join(
-            (m.group(0) for m in CLS_NAME_TO_CAMPAIGN_RE.finditer(cls.__qualname__))
+            m.group(0) for m in CLS_NAME_TO_CAMPAIGN_RE.finditer(cls.__qualname__)
         ).upper()
 
     def update_url_params(self, url, **params):
@@ -192,8 +191,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         return self.subject % context
 
     def get_preheader(self):
-        """
-        Return the email's preheader.
+        """Return the email's preheader.
 
         A brief text that recipients will see in their inbox before opening the email
         along with the subject. Unless explicitly set, the preheader will be the first
@@ -217,7 +215,7 @@ class MarkdownEmail(EmailMultiAlternatives):
                 "markdown.extensions.extra",
             ],
         )
-        context["markdown_string"] = mark_safe(html_message)  # nosec
+        context["markdown_string"] = mark_safe(html_message)  # noqa: S308
 
         template = loader.get_template(self.base_html_template)
         rendered_html = template.render(context)

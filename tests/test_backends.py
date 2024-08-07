@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, Mock
 
 import pytest
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-
 from emark import backends
 from emark.models import Send
 

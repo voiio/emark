@@ -3,9 +3,8 @@ import uuid
 import pytest
 from django.urls import reverse
 from django.utils.http import urlencode
-from model_bakery import baker
-
 from emark import models
+from model_bakery import baker
 
 
 class TestEmailDetailView:

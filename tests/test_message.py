@@ -1,13 +1,12 @@
 import copy
 from pathlib import Path
 
+import emark.message
 import pytest
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.test.html import parse_html
 from model_bakery import baker
-
-import emark.message
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -250,7 +249,7 @@ class TestMarkdownEmail:
             language="en-US",
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
-        msg.get_preheader() == ""
+        assert msg.get_preheader() == ""
 
     def test_get_preheader(self):
         email_message = MarkdownEmailTestWithPreheader(
