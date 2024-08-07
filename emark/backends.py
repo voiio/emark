@@ -24,7 +24,7 @@ class RenderEmailBackendMixin:
 
 
 class TrackingEmailBackendMixin:
-    """Add tracking framework to an email backend."""
+    """Add a tracking framework to an email backend."""
 
     def send_messages(self, email_messages):
         self._messages_sent = []
@@ -83,7 +83,7 @@ class ConsoleEmailBackendMixin:
             msg.get_charset().get_output_charset() if msg.get_charset() else "utf-8"
         )
         msg_data = msg_data.decode(charset)
-        self.stream.write("%s\n" % msg_data)
+        self.stream.write(f"{msg_data}\n")
         self.stream.write("-" * 79)
         self.stream.write("\n")
         if payload_count > 1:
@@ -119,8 +119,7 @@ class TrackingConsoleEmailBackend(
 
 
 class TrackingSMTPEmailBackend(TrackingEmailBackendMixin, _SMTPEmailBackend):
-    """
-    Like the SMTP email backend but with click and open tracking.
+    """Like the SMTP email backend but with click and open tracking.
 
     Furthermore, all emails are sent to a single email address.
     If multiple to, cc, or bcc addresses are specified, a separate

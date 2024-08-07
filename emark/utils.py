@@ -9,8 +9,7 @@ __all__ = ["HTML2TextParser"]
 
 @dataclasses.dataclass
 class Node:
-    """
-    Simple HTML node that can be extracted into plain text.
+    """Simple HTML node that can be extracted into plain text.
 
     Nodes have a parent and children link to create a tree structure.
     Plain text extraction is done by recursively traversing the tree.
