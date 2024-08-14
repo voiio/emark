@@ -2,11 +2,15 @@ from urllib.parse import urlparse
 
 from django import http
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.http import Http404
 from django.http.request import split_domain_port, validate_host
+from django.urls import reverse
 from django.views import View
+from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 
-from . import models
+from . import conf, message, models, utils
 
 # white 1x1 pixel JPEG in bytes:
 #
@@ -93,3 +97,67 @@ class EmailOpenView(SingleObjectMixin, View):
                 "Cache-Control": "no-cache, no-store, must-revalidate",
             },
         )
+
+
+class DashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Show a dashboard of available email classes."""
+
+    template_name = "emark/dashboard.html"
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_emails(self):
+        hidden_classes = [
+            message.MarkdownEmail.__name__,
+            *conf.get_settings().DASHBOARD_HIDDEN_CLASSES,
+        ]
+        emails = [
+            {
+                "app_label": email_class.__module__.split(".")[0],
+                "class_name": email_class.__name__,
+                "doc": email_class.__doc__ or "",
+                "detail_url": reverse(
+                    "emark:email-preview", args=[email_class.__name__]
+                ),
+            }
+            for email_class in utils.get_subclasses(message.MarkdownEmail)
+            if email_class.__name__ not in hidden_classes
+        ]
+        return sorted(
+            emails, key=lambda email: (email["app_label"], email["class_name"])
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs) | {
+            "emails": self.get_emails(),
+        }
+
+
+class EmailPreviewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """Render a preview of the email."""
+
+    template_name = "emark/preview.html"
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def dispatch(self, request, *args, **kwargs):
+        self.email_class = self.get_email_class(kwargs["email_class"])
+        if not self.email_class:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_email_class(self, email_class):
+        for cl in utils.get_subclasses(message.MarkdownEmail):
+            if cl.__name__ == email_class:
+                return cl
+        return None
+
+    def get_context_data(self, **kwargs):
+        email = self.email_class
+        return super().get_context_data(**kwargs) | {
+            "email_preview": email.render_preview(),
+            "email_name": email.__name__,
+            "email_doc": email.__doc__,
+        }

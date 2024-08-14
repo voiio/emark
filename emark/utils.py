@@ -122,3 +122,10 @@ class HTML2TextParser(HTMLParser):
         # sanitize all wide vertical or horizontal spaces
         text = self.DOUBLE_NEWLINE.sub("\n\n", text.strip())
         return self.DOUBLE_SPACE.sub(" ", text)
+
+
+def get_subclasses(cls):
+    """Return all subclasses of a class, without the base classes."""
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in get_subclasses(c)]
+    )
