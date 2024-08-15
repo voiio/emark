@@ -17,8 +17,8 @@ from django.utils.safestring import mark_safe
 
 from emark import conf, utils
 
-INLINE_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
-INLINE_HTML_LINK_RE = re.compile(r"href=\"([^\"]+)\"")
+INLINE_LINK_RE = re.compile(r"\[[^\]]+\]\((https?://[^)]+)\)")
+INLINE_HTML_LINK_RE = re.compile(r'href="https?://([^"]+)"')
 CLS_NAME_TO_CAMPAIGN_RE = re.compile(
     r".+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)"
 )

@@ -258,7 +258,7 @@ class TestMarkdownEmail:
         )
         assert email_message.preheader == "Donuts events are back!"
 
-    def test_set_utm_attributes(self):
+    def test_inject_utm_params(self):
         email_message = MarkdownEmailTestWithSubject(
             language="en-US",
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
@@ -272,6 +272,7 @@ class TestMarkdownEmail:
             "This is another link! <https://www.example.com/?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT&foo=bar>"
             in email_message.body
         )
+        assert "555-2368 <tel:5552368>" in email_message.body
 
     def test_get_utm_campaign_name(self):
         assert (
