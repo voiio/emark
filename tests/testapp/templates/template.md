@@ -11,5 +11,6 @@ Vanilla lollipop biscuit cake marzipan jelly.
 
 [This is a link!](https://www.example.com)
 [This is another link!](https://www.example.com/?foo=bar)
+[555-2368](tel:5552368)
 
 <a href="https://www.example.com/html">An HTML Link</a>
