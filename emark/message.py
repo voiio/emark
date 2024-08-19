@@ -131,10 +131,10 @@ class MarkdownEmail(EmailMultiAlternatives):
         for url in INLINE_LINK_RE.findall(md):
             try:
                 url_parts = parse.urlparse(url)
-                if url_parts.scheme and url_parts.scheme not in [
+                if url_parts.scheme not in [
                     "http",
                     "https",
-                    "localhost",
+                    "",
                 ]:
                     continue
             except ValueError:
@@ -143,10 +143,10 @@ class MarkdownEmail(EmailMultiAlternatives):
         for url in INLINE_HTML_LINK_RE.findall(md):
             try:
                 url_parts = parse.urlparse(url)
-                if url_parts.scheme and url_parts.scheme not in [
+                if url_parts.scheme not in [
                     "http",
                     "https",
-                    "localhost",
+                    "",
                 ]:
                     continue
             except ValueError:
