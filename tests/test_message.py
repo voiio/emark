@@ -281,7 +281,7 @@ class TestMarkdownEmail:
             in email_message.body
         )
         assert (
-            "localhost:8000 <localhost:8000?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
+            "localhost:8000 <http://localhost:8000?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
         )
         assert "555-2368 <tel:5552368>" in email_message.body
