@@ -265,11 +265,23 @@ class TestMarkdownEmail:
         )
         email_message.render()
         assert (
-            "This is a link! <https://www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
+            "A link <https://www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
         )
         assert (
-            "This is another link! <https://www.example.com/?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT&foo=bar>"
+            "A link with parameter <https://www.example.com/?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT&foo=bar>"
+            in email_message.body
+        )
+        assert (
+            "A link without a scheme <www.example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
+            in email_message.body
+        )
+        assert (
+            "A link without www <example.com?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
+            in email_message.body
+        )
+        assert (
+            "localhost:8000 <localhost:8000?utm_source=website&utm_medium=email&utm_campaign=MARKDOWN_EMAIL_TEST_WITH_SUBJECT>"
             in email_message.body
         )
         assert "555-2368 <tel:5552368>" in email_message.body
