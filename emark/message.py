@@ -17,8 +17,8 @@ from django.utils.safestring import mark_safe
 
 from emark import conf, utils
 
-INLINE_LINK_RE = re.compile(r"\[[^\]]+\]\((https?://[^)]+)\)")
-INLINE_HTML_LINK_RE = re.compile(r'href="https?://([^"]+)"')
+INLINE_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+)\)")
+INLINE_HTML_LINK_RE = re.compile(r"href=\"([^\"]+)\"")
 CLS_NAME_TO_CAMPAIGN_RE = re.compile(
     r".+?(?:(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])|$)"
 )
@@ -129,8 +129,28 @@ class MarkdownEmail(EmailMultiAlternatives):
 
     def inject_utm_params(self, md, **utm):
         for url in INLINE_LINK_RE.findall(md):
+            try:
+                url_parts = parse.urlparse(url)
+                if url_parts.scheme and url_parts.scheme not in [
+                    "http",
+                    "https",
+                    "localhost",
+                ]:
+                    continue
+            except ValueError:
+                continue
             md = md.replace(f"({url})", f"({self.update_url_params(url, **utm)})")
         for url in INLINE_HTML_LINK_RE.findall(md):
+            try:
+                url_parts = parse.urlparse(url)
+                if url_parts.scheme and url_parts.scheme not in [
+                    "http",
+                    "https",
+                    "localhost",
+                ]:
+                    continue
+            except ValueError:
+                continue
             md = md.replace(
                 f'href="{url}"', f'href="{self.update_url_params(url, **utm)}"'
             )
