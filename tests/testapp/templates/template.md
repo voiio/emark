@@ -13,6 +13,7 @@ Vanilla lollipop biscuit cake marzipan jelly.
 [A link with parameter](https://www.example.com/?foo=bar)
 [A link without a scheme](www.example.com)
 [A link without www](example.com)
+[ALL CAPS LINK](HTTP://WWW.EXAMPLE.COM)
 [localhost:8000](http://localhost:8000)
 [555-2368](tel:5552368)
 
