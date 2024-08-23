@@ -110,3 +110,11 @@ class TestHTML2TextParser:
             "--------------------------------------------------\n"
             "some footer"
         )
+
+
+def test_extract_domain():
+    assert utils.extract_domain("https://example.com") == "example.com"
+    assert utils.extract_domain("https://www.example.com") == "example.com"
+    assert utils.extract_domain("https://www.example.co.uk") == "example.co.uk"
+    assert utils.extract_domain("https://localhost") == "localhost"
+    assert utils.extract_domain("https://localhost:8000") == "localhost:8000"

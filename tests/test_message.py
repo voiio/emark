@@ -197,11 +197,13 @@ class TestMarkdownEmail:
             in email_message.html
         )
 
-    def test_get_site_domain__setting(self, email_message):
-        assert email_message.get_site_url() == "http://www.example.com"
+    @pytest.mark.parametrize("domain", ["www.example.com", "example.com"])
+    def test_get_site_url__setting(self, email_message, settings, domain):
+        settings.EMARK = {"DOMAIN": domain}
+        assert email_message.get_site_url() == f"http://{domain}"
 
     @pytest.mark.django_db
-    def test_test_get_site_domain__sites_framework(self, email_message, settings):
+    def test_get_site_url__sites_framework(self, email_message, settings):
         settings.EMARK = {"DOMAIN": None}
         settings.SITE_ID = 1
         assert email_message.get_site_url() == "http://example.com"
@@ -330,7 +332,27 @@ class TestMarkdownEmail:
             "click?url=https%3A%2F%2Fwww.example.com%2F%3Futm_medium%3Dbaz%26utm_source%3Dfoo"
         )
 
-    def test_update_url_params__subdomain(self, email_message):
+    @pytest.mark.parametrize(
+        "domain",
+        ["www.example.com", "example.com", "test.example.com", "localhost:8000"],
+    )
+    def test_update_url_params__domains(self, settings, email_message, domain):
+        settings.EMARK["DOMAIN"] = domain
+        email_message.uuid = "12341234-1234-1234-1234-123412341234"
+        encoded_domain = domain.replace(":", "%3A")
+        expected_url = (
+            f"http://{domain}/emark/12341234-1234-1234-1234-123412341234/"
+            f"click?url=https%3A%2F%2F{encoded_domain}%2F%3Futm_medium%3Dbaz%26utm_source%3Dfoo"
+        )
+        assert (
+            email_message.update_url_params(
+                f"https://{domain}/?utm_source=foo", utm_medium="baz"
+            )
+            == expected_url
+        )
+
+    def test_update_url_params__subdomain(self, settings, email_message):
+        settings.EMARK["DOMAIN"] = "www.example.com"
         email_message.uuid = "12341234-1234-1234-1234-123412341234"
         assert (
             email_message.update_url_params(
