@@ -10,7 +10,6 @@ def get_settings():
         {
             "UTM_PARAMS": {"utm_source": "website", "utm_medium": "email"},
             "DOMAIN": None,
-            "DASHBOARD_HIDDEN_CLASSES": [],
             **getattr(settings, "EMARK", {}),
         },
     )

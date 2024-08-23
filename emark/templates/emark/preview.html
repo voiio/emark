@@ -4,7 +4,7 @@
             border: 1px solid black;
             font-size: small;
             opacity: 0.8">
-  &nbsp; &nbsp;<a href="{% url 'emark:email-dashboard' %}">Dashboard</a> > {{ email_name }}
-  {% if email_doc %}-- {{ email_doc }}{% endif %}
+  &nbsp; &nbsp;<a href="{% url 'emark:email-dashboard' %}">Dashboard</a> > {{ email.name }}
+  {% if email.doc %}-- {{ email.doc }}{% endif %}
 </div>
-{{ email_preview|safe }}
+{{ email.preview|safe }}
