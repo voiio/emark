@@ -1,17 +1,16 @@
 from urllib.parse import urlparse
 
 from django import http
-from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.http.request import split_domain_port, validate_host
-from django.urls import reverse
 from django.views import View
 from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 
 from . import models
+from .registry import emark_registry
 
 # white 1x1 pixel JPEG in bytes:
 #
@@ -106,19 +105,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "emark/dashboard.html"
 
     def get_emails(self):
-        emails = [
-            {
-                "app_label": email_class.__module__.split(".")[0],
-                "class_name": email_class.__name__,
-                "doc": email_class.__doc__ or "",
-                "detail_url": reverse(
-                    "emark:email-preview", args=[email_class.__name__]
-                ),
-            }
-            for email_class in apps.get_app_config("emark").emails
-        ]
         return sorted(
-            emails, key=lambda email: (email["app_label"], email["class_name"])
+            emark_registry, key=lambda email: (email["app_label"], email["name"])
         )
 
     def get_context_data(self, **kwargs):
@@ -133,27 +121,12 @@ class EmailPreviewView(LoginRequiredMixin, TemplateView):
     template_name = "emark/preview.html"
 
     def dispatch(self, request, *args, **kwargs):
-        self.email_class = self.get_email_class(kwargs["email_class"])
-        if not self.email_class:
+        self.email_data = emark_registry.get(kwargs["email_class"])
+        if not self.email_data:
             raise Http404()
         return super().dispatch(request, *args, **kwargs)
 
-    def get_email_class(self, email_class):
-        return next(
-            (
-                email
-                for email in apps.get_app_config("emark").emails
-                if email.__name__ == email_class
-            ),
-            None,
-        )
-
     def get_context_data(self, **kwargs):
-        email = self.email_class
         return super().get_context_data(**kwargs) | {
-            "email": {
-                "name": email.__name__,
-                "doc": email.__doc__,
-                "preview": email.render_preview(),
-            }
+            "email": self.email_data,
         }

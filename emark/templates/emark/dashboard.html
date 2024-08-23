@@ -5,7 +5,7 @@
   <ul>
     {% for email in app_label.list %}
       <li>
-        <a href="{{ email.detail_url }}">{{ email.class_name }}</a>
+        <a href="{{ email.detail_url }}">{{ email.name }}</a>
         {% if email.doc %}-- {{ email.doc }}{% endif %}
       </li>
     {% endfor %}
