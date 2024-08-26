@@ -141,8 +141,7 @@ def extract_domain(url: str) -> str:
     """
     extractor = tldextract.TLDExtract(suffix_list_urls=())
     extracted = extractor(url)
-    if extracted.domain == "localhost":
-        if port := parse.urlparse(url).port:
-            return f"{extracted.domain}:{port}"
-        return extracted.domain
+      if port := parse.urlparse(url).port:
+          return f"{extracted.domain}:{port}"
+      return extracted.domain
     return extracted.registered_domain
