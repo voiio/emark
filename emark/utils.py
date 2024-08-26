@@ -6,6 +6,10 @@ from html.parser import HTMLParser
 
 __all__ = ["HTML2TextParser"]
 
+from urllib import parse
+
+import tldextract
+
 
 @dataclasses.dataclass
 class Node:
@@ -122,3 +126,25 @@ class HTML2TextParser(HTMLParser):
         # sanitize all wide vertical or horizontal spaces
         text = self.DOUBLE_NEWLINE.sub("\n\n", text.strip())
         return self.DOUBLE_SPACE.sub(" ", text)
+
+
+def extract_domain(url: str) -> str:
+    """Extracts the registered domain from a given URL.
+
+    If the domain is "localhost", it includes the port number in the returned string.
+
+    Args:
+        url (str): The URL from which to extract the domain.
+
+    Returns:
+        str: The registered domain or "localhost" with port if applicable.
+    """
+    extractor = tldextract.TLDExtract(suffix_list_urls=())
+    extracted = extractor(url)
+    if extracted.domain == "localhost":
+        registered_domain = "localhost"
+    else:
+        registered_domain = extracted.registered_domain
+    if port := parse.urlparse(url).port:
+        return f"{registered_domain}:{port}"
+    return registered_domain
