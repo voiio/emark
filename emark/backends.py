@@ -16,6 +16,13 @@ __all__ = [
 
 
 class RenderEmailBackendMixin:
+
+    def __enter__(self):
+        # Do not open a connection before rendering the messages
+        # to avoid connection timeouts.
+        # EmailBackend.send_messages() will open the connection.
+        return self
+
     def send_messages(self, email_messages):
         for message in email_messages:
             if isinstance(message, MarkdownEmail):
@@ -25,6 +32,12 @@ class RenderEmailBackendMixin:
 
 class TrackingEmailBackendMixin:
     """Add a tracking framework to an email backend."""
+
+    def __enter__(self):
+        # Do not open a connection before rendering the messages
+        # to avoid connection timeouts.
+        # EmailBackend.send_messages() will open the connection.
+        return self
 
     def send_messages(self, email_messages):
         self._messages_sent = []

@@ -27,6 +27,11 @@ class TestConsoleEmailBackend:
 
 
 class TestSMTPEmailBackend:
+
+    def test_enter(self):
+        with backends.SMTPEmailBackend() as backend:
+            assert not backend.connection, "Connection should not be opened"
+
     def test_send(self, email_message):
         class TestBackend(backends.SMTPEmailBackend):
             def _send(self, message):
@@ -103,6 +108,11 @@ class TestTrackingConsoleEmailBackend:
 
 
 class TestTrackingSMTPEmailBackend:
+
+    def test_enter(self):
+        with backends.TrackingSMTPEmailBackend() as backend:
+            assert not backend.connection, "Connection should not be opened"
+
     @pytest.mark.django_db
     def test_send(self, email_message):
         email_message.to = [
