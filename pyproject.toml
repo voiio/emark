@@ -36,7 +36,7 @@ classifiers = [
   "Framework :: Django :: 5.0",
 ]
 requires-python = ">=3.10"
-dependencies = ["django", "markdown", "premailer", "tldextract"]
+dependencies = ["django", "markdown", "premailer"]
 
 [project.optional-dependencies]
 test = [
