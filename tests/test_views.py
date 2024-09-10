@@ -34,13 +34,15 @@ class TestEmailDetailView:
 
 class TestEmailClickView:
     @pytest.mark.django_db
-    def test_get__no_redirect_url(self, client):
+    def test_get__no_redirect_url(self, client, caplog):
         msg = baker.make("emark.Send")
         response = client.get(reverse("emark:email-click", kwargs={"pk": msg.pk}))
         assert response.status_code == 400
+        assert response.content == b"Missing url parameter"
+        assert "Missing url parameter" in caplog.text
 
     @pytest.mark.django_db
-    def test_get__unsafe_redirect_url(self, client, live_server):
+    def test_get__unsafe_redirect_url(self, client, live_server, caplog):
         msg = baker.make("emark.Send")
         redirect_url = "http://external-domain.com/?utm_source=foo"
 
@@ -49,6 +51,8 @@ class TestEmailClickView:
         url = f"{url}?{urlencode({'url': redirect_url})}"
         response = client.get(url)
         assert response.status_code == 400
+        assert response.content == b"Malformed url parameter"
+        assert "Malformed URL parameter" in caplog.text
 
     @pytest.mark.django_db
     def test_get__different_schema_redirect_url(self, client, live_server):
@@ -66,6 +70,18 @@ class TestEmailClickView:
         settings.ALLOWED_HOSTS = ["testserver", ".testserver"]
         msg = baker.make("emark.Send")
         redirect_url = "http://sub.testserver/?utm_source=foo"
+
+        url = reverse("emark:email-click", kwargs={"pk": msg.pk})
+
+        url = f"{url}?{urlencode({'url': redirect_url})}"
+        response = client.get(url)
+        assert response.status_code == 302
+
+    @pytest.mark.django_db
+    def test_get__absolute_path(self, client, live_server, settings):
+        settings.ALLOWED_HOSTS = ["testserver", ".testserver"]
+        msg = baker.make("emark.Send")
+        redirect_url = "/some/path?utm_source=foo"
 
         url = reverse("emark:email-click", kwargs={"pk": msg.pk})
 

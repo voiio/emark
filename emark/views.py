@@ -1,3 +1,4 @@
+import logging
 from urllib.parse import urlparse
 
 from django import http
@@ -7,6 +8,8 @@ from django.views import View
 from django.views.generic.detail import SingleObjectMixin
 
 from . import models
+
+logger = logging.getLogger(__name__)
 
 # white 1x1 pixel JPEG in bytes:
 #
@@ -44,30 +47,39 @@ class EmailClickView(SingleObjectMixin, View):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
 
-        redirect_to = request.GET.get("url")
-        # The redirect_to URL is user-provided, so it might be malicious
-        # or malformed. We use Django's URL validation to ensure that it
-        # is safe to redirect to.
+        try:
+            redirect_to = request.GET["url"]
+        except KeyError:
+            logger.warning(
+                "Missing url parameter", extra={"request": request}, exc_info=True
+            )
+            return http.HttpResponseBadRequest("Missing url parameter")
         parsed_url = urlparse(redirect_to)
-        if not parsed_url.netloc:
-            return http.HttpResponseBadRequest("Missing url or malformed parameter")
-
-        domain, _port = split_domain_port(parsed_url.netloc)
-        allowed_hosts = settings.ALLOWED_HOSTS
-        if settings.DEBUG:
-            allowed_hosts = settings.ALLOWED_HOSTS + [
-                ".localhost",
-                "127.0.0.1",
-                "[::1]",
-            ]
-        if any(
-            [
-                not domain,
-                not validate_host(domain, allowed_hosts),
-                request.scheme != parsed_url.scheme,
-            ]
-        ):
-            return http.HttpResponseBadRequest("Missing url or malformed parameter")
+        if parsed_url.netloc:
+            # The redirect_to URL is user-provided, so it might be malicious
+            # or malformed. We use Django's URL validation to ensure that it
+            # is safe to redirect to.
+            domain, _port = split_domain_port(parsed_url.netloc)
+            allowed_hosts = settings.ALLOWED_HOSTS
+            if settings.DEBUG:
+                allowed_hosts = settings.ALLOWED_HOSTS + [
+                    ".localhost",
+                    "127.0.0.1",
+                    "[::1]",
+                ]
+            if any(
+                [
+                    not domain,
+                    not validate_host(domain, allowed_hosts),
+                    request.scheme != parsed_url.scheme,
+                ]
+            ):
+                logger.warning(
+                    "Malformed URL parameter: %s",
+                    redirect_to,
+                    extra={"request": request},
+                )
+                return http.HttpResponseBadRequest("Malformed url parameter")
 
         models.Click.objects.create_for_request(
             request, email=self.object, redirect_url=redirect_to
