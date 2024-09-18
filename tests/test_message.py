@@ -359,12 +359,11 @@ class TestMarkdownEmail:
                 "https://test.example.com/?utm_source=foo",
                 utm_medium="baz",
             )
-            == "http://www.example.com/emark/12341234-1234-1234-1234-123412341234/"
-            "click?url=https%3A%2F%2Ftest.example.com%2F%3Futm_medium%3Dbaz%26utm_source%3Dfoo"
+            == "https://test.example.com/?utm_medium=baz&utm_source=foo"
         )
 
     def test_update_url_params__external_resource(self, email_message):
-        email_message._tracking_uuid = "12341234-1234-1234-1234-123412341234"
+        email_message.uuid = "12341234-1234-1234-1234-123412341234"
         assert (
             email_message.update_url_params(
                 "https://google.com/",
