@@ -1,32 +1,41 @@
-from django.urls import reverse_lazy
+"""This module is used to register the email classes for the emark dashboard.
+
+The following is an example of how to use this module:
+
+    ```python
+    from emark.registry import emark_registry
+    from emark.emails import EAPExpertBookingEmail, EAPExpertBookingTicketEmail
+
+    @emark_registry
+    class EAPExpertBookingEmail(MarkdownEmail):
+        template = "experts/emails/booking.md"
+
+    @emark_registry
+    class EAPExpertBookingTicketEmail(EAPSupportTicketEmail):
+        template = "experts/emails/booking_ticket.md"
+    ```
+"""
+
+registry = {}
 
 
-class EmarkRegistry:
-    def __init__(self):
-        self.emails = {}
+def emark_registry(cls, key=None):
+    """Decorator to register an email class with the emark dashboard.
 
-    def __iter__(self):
-        return iter(self.emails.values())
+    Args:
+        cls (class): The email
+        key (str): The key to use in the registry. Defaults to the class name.
 
-    def __call__(self, email_class):
-        self.emails[email_class.__name__] = {
-            "app_label": email_class.__module__.split(".")[0],
-            "class": email_class,
-            "name": email_class.__name__,
-            "doc": email_class.__doc__ or "",
-            "detail_url": reverse_lazy(
-                "emark:email-preview", args=[email_class.__name__]
-            ),
-        }
-        return email_class
+    Returns:
+        class: The class that was passed in.
+    """
+    if key is None:
+        key = cls.__name__
 
-    def __getitem__(self, email_class):
-        email = self.emails.get(email_class)
-        email["preview"] = email["class"].render_preview()
-        return email
+    registry[key] = {
+        "app_label": cls.__module__.split(".")[0],
+        "name": key,
+        "cls": cls,
+    }
 
-    def get(self, email_class):
-        return self.__getitem__(email_class)
-
-
-emark_registry = EmarkRegistry()
+    return cls
