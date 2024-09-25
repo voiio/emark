@@ -2,16 +2,11 @@ from urllib.parse import urlparse
 
 from django import http
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
 from django.http.request import split_domain_port, validate_host
-from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
 from django.views.generic.detail import SingleObjectMixin
 
 from . import models
-from .registry import registry
 
 # white 1x1 pixel JPEG in bytes:
 #
@@ -98,48 +93,3 @@ class EmailOpenView(SingleObjectMixin, View):
                 "Cache-Control": "no-cache, no-store, must-revalidate",
             },
         )
-
-
-class EmailDataMixin:
-    def get_email_data(self, email_class):
-        return {
-            "app_label": email_class.__module__.split(".")[0],
-            "class": email_class,
-            "name": email_class.__name__,
-            "doc": email_class.__doc__ or "",
-            "detail_url": reverse_lazy(
-                "emark:email-preview", args=[email_class.__name__]
-            ),
-            "preview": email_class.render_preview(),
-        }
-
-
-class DashboardView(LoginRequiredMixin, EmailDataMixin, TemplateView):
-    """Show a dashboard of available email classes."""
-
-    template_name = "emark/dashboard.html"
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs) | {
-            "emails": [
-                self.get_email_data(email_data["cls"])
-                for email_data in registry.values()
-            ],
-        }
-
-
-class EmailPreviewView(LoginRequiredMixin, EmailDataMixin, TemplateView):
-    """Render a preview of the email."""
-
-    template_name = "emark/preview.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        self.email_class = registry.get(kwargs["email_class"])
-        if not self.email_class:
-            raise Http404()
-        return super().dispatch(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs) | {
-            "email": self.get_email_data(self.email_class["cls"]),
-        }

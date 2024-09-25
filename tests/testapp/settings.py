@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "emark",
+    "emark.contrib.dashboard",
     "tests.testapp",
 ]
 
