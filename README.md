@@ -241,10 +241,10 @@ To enable the dashboard, add the app to your `INSTALLED_APPS` setting
 # settings.py
 INSTALLED_APPS = [
     # ...
-    "django.contrib.admin",  # required for the dashboard
-    # ...
     "emark",
-    "emark.contrib.dashboard",
+    "emark.contrib.dashboard",  # needs to be added before Django's admin app
+    # ...
+    "django.contrib.admin",  # required for the dashboard
     # ...
 ]
 ```

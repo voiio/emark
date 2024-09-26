@@ -1,0 +1,9 @@
+{% extends "admin/base_site.html" %}
+{% block branding %}
+  {{ block.super }}
+  {% url 'emark-dashboard:dashboard' as dashboard_url %}
+  {% if request.path != dashboard_url %}
+    <a href="{% url 'emark-dashboard:dashboard' %}"
+       style="align-self: center">eMark</a>
+  {% endif %}
+{% endblock %}
