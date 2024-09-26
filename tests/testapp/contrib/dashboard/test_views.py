@@ -41,18 +41,18 @@ class TestDashboardView:
 
 class TestEmailPreviewView:
 
-    def test_dispatch__404(self, rf):
+    def test_get__404(self, rf):
         request = rf.get("/emark/dashboard/path/preview")
         view = views.EmailPreviewView()
         with pytest.raises(Http404):
             view.dispatch(request, email_class="path")
 
-    def test_dispatch(self, rf):
+    def test_get(self, rf):
         view = views.EmailPreviewView()
         view.request = rf.get("/emark/dashboard/tests.MarkdownEmailTest/preview")
         view.kwargs = {"email_class": "tests.MarkdownEmailTest"}
         _registry["MarkdownEmailTest"] = MarkdownEmailTest
-        view.dispatch(view.request, email_class="MarkdownEmailTest")
+        view.get(view.request, email_class="MarkdownEmailTest")
         assert view.email_class == MarkdownEmailTest
         del _registry["MarkdownEmailTest"]
 

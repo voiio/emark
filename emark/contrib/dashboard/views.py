@@ -44,7 +44,7 @@ class EmailPreviewView(TemplateView):
             self.email_class = _registry[key]
         except KeyError as e:
             raise Http404() from e
-        return super().dispatch(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(**kwargs) | {
