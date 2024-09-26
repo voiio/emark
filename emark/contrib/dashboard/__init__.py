@@ -23,5 +23,5 @@ __all__ = ["register"]
 
 def register(cls: type[MarkdownEmail], key: str = None) -> type[MarkdownEmail]:
     """Register a MarkdownEmail with the registry."""
-    _registry[key or cls.__qualname__] = cls
+    _registry[key or f"{cls.__module__}{cls.__qualname__}"] = cls
     return cls

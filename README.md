@@ -254,7 +254,6 @@ and add the following to your `urls.py`:
 ```python
 # urls.py
 from django.urls import include, path
-from django.contrib.admin.views.decorators import staff_member_required
 
 
 urlpatterns = [

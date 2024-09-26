@@ -18,7 +18,7 @@ def serialize_email_class(email_class: type[MarkdownEmail], path: str) -> {str: 
 
 
 class DashboardView(TemplateView):
-    """Show a dashboard of available email classes."""
+    """Show a dashboard of registered email classes."""
 
     template_name = "emark/dashboard/dashboard.html"
 
@@ -34,13 +34,14 @@ class DashboardView(TemplateView):
 
 
 class EmailPreviewView(TemplateView):
-    """Render a preview of the email."""
+    """Render a preview of a single email template."""
 
     template_name = "emark/dashboard/preview.html"
 
-    def dispatch(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
+        key = kwargs["email_class"]
         try:
-            self.email_class = _registry[kwargs["email_class"]]
+            self.email_class = _registry[key]
         except KeyError as e:
             raise Http404() from e
         return super().dispatch(request, *args, **kwargs)
