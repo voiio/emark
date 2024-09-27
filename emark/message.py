@@ -276,3 +276,20 @@ class MarkdownEmail(EmailMultiAlternatives):
                 )
                 self.body = self.get_body(self.html)
                 self.attach_alternative(self.html, "text/html")
+
+    @classmethod
+    def render_preview(cls):
+        """Return a preview of the email."""
+        markdown_string = loader.get_template(cls.template).template.source
+        context = {}
+        html_message = markdown.markdown(
+            markdown_string,
+            extensions=[
+                "markdown.extensions.meta",
+                "markdown.extensions.tables",
+                "markdown.extensions.extra",
+            ],
+        )
+        context["markdown_string"] = mark_safe(html_message)  # noqa: S308
+        template = loader.get_template(cls.base_html_template)
+        return template.render(context)

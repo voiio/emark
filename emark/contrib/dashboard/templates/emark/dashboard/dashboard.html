@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+  <h2>eMark Dashboard</h2>
+  {% regroup emails by app_label as emails_by_app_label %}
+  {% for app_label in emails_by_app_label %}
+    <h3>{{ app_label.grouper }}</h3>
+    <ul>
+      {% for email in app_label.list %}
+        <li>
+          <a href="{{ email.detail_url }}">{{ email.name }}</a>
+          {% if email.doc %}-- {{ email.doc }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+{% endblock %}

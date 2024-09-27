@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+    &rsaquo;
+    <a href="{% url 'emark-dashboard:dashboard' %}">{{ title }}</a>
+    &rsaquo; {{ subtitle }}
+  </div>
+{% endblock %}
+{% block content %}
+  <div id="preview"></div>
+  <script>
+  const iFrame = document.getElementById('preview');
+  const shadow = iFrame.attachShadow({ mode: "open" });
+  shadow.innerHTML = `{{ email.preview|safe }}`;
+  </script>
+{% endblock %}

@@ -231,6 +231,53 @@ EMAIL_BACKEND = "emark.backends.ConsoleEmailBackend"
 
 The `ConsoleEmailBackend` will only print the plain text version of the email.
 
+### Email Dashboard
+
+Django eMark comes with a simple email dashboard to preview your templates.
+
+To enable the dashboard, add the app to your `INSTALLED_APPS` setting
+
+```python
+# settings.py
+INSTALLED_APPS = [
+    # ...
+    "emark",
+    "emark.contrib.dashboard",  # needs to be added before Django's admin app
+    # ...
+    "django.contrib.admin",  # required for the dashboard
+    # ...
+]
+```
+
+and add the following to your `urls.py`:
+
+```python
+# urls.py
+from django.urls import include, path
+
+
+urlpatterns = [
+    # … other urls
+    path("emark/", include([
+        path("", include("emark.urls")),
+        path("dashboard/", include("emark.contrib.dashboard.urls")),
+    ])),
+]
+```
+
+Next you need to register the email classes you want to preview in the dashboard:
+
+```python
+# myapp/emails.py
+from emark.message import MarkdownEmail
+from emark.contrib import dashboard
+
+@dashboard.register
+class MyMessage(MarkdownEmail):
+    subject = "Hello World"
+    template_name = "myapp/email.md"
+```
+
 ## Credits
 
 - Django eMark uses modified version of [Responsive HTML Email Template](https://github.com/leemunroe/responsive-html-email-template/) as a base template
