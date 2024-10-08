@@ -48,7 +48,7 @@ test = [
 lint = [
   "black==24.8.0",
   "pre-commit==4.0.0",
-  "ruff==0.6.8",
+  "ruff==0.6.9",
   "djlint==1.35.2",
 ]
 
