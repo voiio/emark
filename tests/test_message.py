@@ -258,7 +258,20 @@ class TestMarkdownEmail:
             language="en-US",
             context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
         )
-        assert email_message.preheader == "Donuts events are back!"
+        assert email_message.get_preheader() == "Donuts events are back!"
+
+    def test_get_preheader__context_aware(self):
+        email_message = MarkdownEmailTestWithPreheader(
+            language="en-US",
+            context={"donut_name": "HoneyNuts", "donut_type": "Honey"},
+            preheader="%(donut_type)s donuts events are back!",
+        )
+        assert (
+            email_message.get_preheader(
+                **{"donut_name": "HoneyNuts", "donut_type": "Honey"}
+            )
+            == "Honey donuts events are back!"
+        )
 
     def test_inject_utm_params(self):
         email_message = MarkdownEmailTestWithSubject(

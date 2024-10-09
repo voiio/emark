@@ -40,6 +40,7 @@ class MarkdownEmail(EmailMultiAlternatives):
     base_html_template = "emark/base.html"
     template = None
     subject = None
+    preheader = None
     uuid = False
 
     def __init__(
@@ -49,6 +50,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         context: dict = None,
         utm_params=None,
         template=None,
+        preheader=None,
         **kwargs,
     ):
         """Initialize an email message and attach a rendered HTML version of it."""
@@ -57,6 +59,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         self.language = language
         self.utm_params = utm_params or {}
         self.subject = subject or self.subject
+        self.preheader = preheader or self.preheader
         self.html = None
         self.markdown = None
         super().__init__(subject=self.subject, **kwargs)
@@ -213,7 +216,7 @@ class MarkdownEmail(EmailMultiAlternatives):
             )
         return self.subject % context
 
-    def get_preheader(self):
+    def get_preheader(self, **context):
         """Return the email's preheader.
 
         A brief text that recipients will see in their inbox before opening the email
@@ -222,7 +225,7 @@ class MarkdownEmail(EmailMultiAlternatives):
         Can be useful to grab the recipient's attention and/or simplify their workflow
         (e.g. by providing a one-time-password).
         """
-        return ""
+        return (self.preheader or "") % context
 
     def get_markdown(self, context, utm):
         template = self.get_template()
@@ -268,7 +271,7 @@ class MarkdownEmail(EmailMultiAlternatives):
                 context |= utm_params
                 self.subject = self.get_subject(**context)
                 context["subject"] = self.subject
-                context["preheader"] = self.get_preheader()
+                context["preheader"] = self.get_preheader(**context)
                 self.markdown = self.get_markdown(context, utm_params)
                 self.html = self.get_html(
                     markdown_string=self.markdown,
