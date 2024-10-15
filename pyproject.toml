@@ -46,7 +46,7 @@ test = [
   "model_bakery",
 ]
 lint = [
-  "black==24.8.0",
+  "black==24.10.0",
   "pre-commit==4.0.1",
   "ruff==0.6.9",
   "djlint==1.35.2",
