@@ -51,7 +51,7 @@ lint = [
   "black==24.10.0",
   "pre-commit==4.0.1",
   "ruff==0.7.1",
-  "djlint==1.35.2",
+  "djlint==1.35.4",
 ]
 
 [project.urls]
