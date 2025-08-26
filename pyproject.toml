@@ -50,7 +50,7 @@ test = [
 lint = [
   "black==25.1.0",
   "pre-commit==4.3.0",
-  "ruff==0.12.8",
+  "ruff==0.12.10",
   "djlint==1.36.4",
 ]
 
