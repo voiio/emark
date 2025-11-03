@@ -16,7 +16,6 @@ __all__ = [
 
 
 class RenderEmailBackendMixin:
-
     def __enter__(self):
         # Do not open a connection before rendering the messages
         # to avoid connection timeouts.

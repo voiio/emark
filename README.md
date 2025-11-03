@@ -4,12 +4,12 @@
 
 Markdown template based HTML and text emails for Django.
 
-* simple email templates with markdown
-* support for HTML and text emails
-* i18n support
-* built-in UTM tracking
-* built-in sent, open and click tracking
-* automatic CSS inliner via [premailer](https://github.com/peterbe/premailer/)
+- simple email templates with markdown
+- support for HTML and text emails
+- i18n support
+- built-in UTM tracking
+- built-in sent, open and click tracking
+- automatic CSS inliner via [premailer](https://github.com/peterbe/premailer/)
 
 [![PyPi Version](https://img.shields.io/pypi/v/emark.svg)](https://pypi.python.org/pypi/emark/)
 [![Test Coverage](https://codecov.io/gh/voiio/emark/branch/main/graph/badge.svg)](https://codecov.io/gh/voiio/emark)
@@ -24,7 +24,7 @@ python3 -m pip install emark
 ```python
 # settings.py
 INSTALLED_APPS = [
-    'emark',
+    "emark",
     # ...
 ]
 ```
@@ -46,6 +46,7 @@ Hi {{ user.short_name }}!
 # myapp/emails.py
 from emark.message import MarkdownEmail
 
+
 class MyMessage(MarkdownEmail):
     subject = "Hello World"
     template_name = "myapp/my_message.md"
@@ -54,6 +55,7 @@ class MyMessage(MarkdownEmail):
 ```python
 # myapp/views.py
 from . import emails
+
 
 def my_view(request):
     message = emails.MyMessage.to_user(request.user)
@@ -105,6 +107,7 @@ override the `get_context_data` method to add additional context variables.
 # myapp/emails.py
 from emark.message import MarkdownEmail
 
+
 class MyMessage(MarkdownEmail):
     subject = "Hello World"
     template_name = "myapp/email.md"
@@ -153,9 +156,7 @@ This can be done via the `DOMAIN` setting:
 
 ```python
 # settings.py
-EMARK = {
-    "DOMAIN": "example.com"
-}
+EMARK = {"DOMAIN": "example.com"}
 ```
 
 If the site framework is installed and no settings are provided,
@@ -177,9 +178,9 @@ Every `MarkdownEmail` subclass comes with automatic UTM tracking.
 UTM parameters are added to all links in the email. Existing UTM params on link
 that have been explicitly set, are not overridden. The default parameters are:
 
-* `utm_source`: `website`
-* `utm_medium`: `email`
-* `utm_campaign`: `{{ EMAIL_CLASS_NAME }}`
+- `utm_source`: `website`
+- `utm_medium`: `email`
+- `utm_campaign`: `{{ EMAIL_CLASS_NAME }}`
 
 The global UTM parameters can be overridden via the `EMARK_UTM_PARAMS` setting,
 which is a dictionary of parameters:
@@ -187,10 +188,10 @@ which is a dictionary of parameters:
 ```python
 # settings.py
 EMARK = {
-  "UTM_PARAMS": {
-      "utm_source": "website",  # default
-      "utm_medium": "email",  # default
-  }
+    "UTM_PARAMS": {
+        "utm_source": "website",  # default
+        "utm_medium": "email",  # default
+    }
 }
 ```
 
@@ -203,16 +204,16 @@ from emark.message import MarkdownEmail
 
 
 class MyMessage(MarkdownEmail):
-  subject = "Hello World"
-  template_name = "myapp/email.md"
+    subject = "Hello World"
+    template_name = "myapp/email.md"
 
-  # override the parameters for this email class
-  def get_utm_params(self):
-    return {
-      "utm_source": "myapp",
-      "utm_medium": "email",
-      "utm_campaign": "my-campaign",
-    }
+    # override the parameters for this email class
+    def get_utm_params(self):
+        return {
+            "utm_source": "myapp",
+            "utm_medium": "email",
+            "utm_campaign": "my-campaign",
+        }
 
 
 # or alternatively during instantiation
@@ -258,10 +259,15 @@ from django.urls import include, path
 
 urlpatterns = [
     # … other urls
-    path("emark/", include([
-        path("", include("emark.urls")),
-        path("dashboard/", include("emark.contrib.dashboard.urls")),
-    ])),
+    path(
+        "emark/",
+        include(
+            [
+                path("", include("emark.urls")),
+                path("dashboard/", include("emark.contrib.dashboard.urls")),
+            ]
+        ),
+    ),
 ]
 ```
 
@@ -271,6 +277,7 @@ Next you need to register the email classes you want to preview in the dashboard
 # myapp/emails.py
 from emark.message import MarkdownEmail
 from emark.contrib import dashboard
+
 
 @dashboard.register
 class MyMessage(MarkdownEmail):
