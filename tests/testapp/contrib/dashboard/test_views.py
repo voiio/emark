@@ -20,7 +20,6 @@ def test_serialize_email_class():
 
 
 class TestDashboardView:
-
     def test_get_context_data(self, rf):
         request = rf.get("/emark/dashboard/")
         view = views.DashboardView()
@@ -40,7 +39,6 @@ class TestDashboardView:
 
 
 class TestEmailPreviewView:
-
     def test_get__404(self, rf):
         request = rf.get("/emark/dashboard/path/preview")
         view = views.EmailPreviewView()

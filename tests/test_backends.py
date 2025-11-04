@@ -27,7 +27,6 @@ class TestConsoleEmailBackend:
 
 
 class TestSMTPEmailBackend:
-
     def test_enter(self):
         with backends.SMTPEmailBackend() as backend:
             assert not backend.connection, "Connection should not be opened"
@@ -108,7 +107,6 @@ class TestTrackingConsoleEmailBackend:
 
 
 class TestTrackingSMTPEmailBackend:
-
     def test_enter(self):
         with backends.TrackingSMTPEmailBackend() as backend:
             assert not backend.connection, "Connection should not be opened"
