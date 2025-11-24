@@ -8,7 +8,7 @@ jobs:
   dist:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: sudo apt install -y gettext
       - uses: actions/setup-python@v6
         with:
@@ -37,7 +37,7 @@ jobs:
           - "test"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: sudo apt install -y gettext
       - uses: actions/setup-python@v6
         with:
