@@ -29,12 +29,24 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
         django-version:
           - "4.2" # LTS
-          - "5.0"
-          - "5.1"
+          - "5.2" # LTS
+          - "6.0"
         extras:
           - "test"
+        exclude:
+          # Django 4.2 doesn't support Python 3.13+
+          - python-version: "3.13"
+            django-version: "4.2"
+          - python-version: "3.14"
+            django-version: "4.2"
+          # Django 6.0 requires Python 3.12+
+          - python-version: "3.10"
+            django-version: "6.0"
+          - python-version: "3.11"
+            django-version: "6.0"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v6
