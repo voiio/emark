@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import email.policy
 import logging
 import re
 from urllib import parse
@@ -96,10 +95,10 @@ class MarkdownEmail(EmailMultiAlternatives):
         obj.user = user
         return obj
 
-    def message(self, *, policy=email.policy.default):
+    def message(self, **kwargs):
         # The connection will call .message while sending the email.
         self.render()
-        return super().message(policy=policy)
+        return super().message(**kwargs)
 
     @classmethod
     def get_utm_campaign_name(cls):
