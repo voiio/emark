@@ -95,10 +95,10 @@ class MarkdownEmail(EmailMultiAlternatives):
         obj.user = user
         return obj
 
-    def message(self):
+    def message(self, *args, **kwargs):
         # The connection will call .message while sending the email.
         self.render()
-        return super().message()
+        return super().message(*args, **kwargs)
 
     @classmethod
     def get_utm_campaign_name(cls):
