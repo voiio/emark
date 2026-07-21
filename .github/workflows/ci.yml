@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: sudo apt install -y gettext
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.x"
       - run: python -m pip install --upgrade pip build wheel twine
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: sudo apt install -y gettext
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install .[${{ matrix.extras }}]
