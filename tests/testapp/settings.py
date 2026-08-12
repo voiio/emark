@@ -132,14 +132,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Email settings
 
-if django.VERSION >= (6, 1):
-    MAILERS = {
-        "default": {
-            "BACKEND": "emark.backends.TrackingSMTPEmailBackend",
-            "OPTIONS": {"host": "localhost"},
-        }
+MAILERS = {
+    "default": {
+        "BACKEND": "emark.backends.TrackingSMTPEmailBackend",
+        "OPTIONS": {"host": "localhost"},
     }
-else:
+}
+if django.VERSION < (6, 1):
     EMAIL_BACKEND = "emark.backends.TrackingSMTPEmailBackend"
 
 EMARK = {"DOMAIN": "www.example.com"}

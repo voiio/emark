@@ -142,9 +142,6 @@ MAILERS = {
         "OPTIONS": {"host": "smtp.example.com"},
     }
 }
-
-# Django 6.0 and earlier
-EMAIL_BACKEND = "emark.backends.TrackingSMTPEmailBackend"
 ```
 
 Furthermore, you need to add the tracking view to your `urls.py`:
@@ -240,9 +237,6 @@ MAILERS = {
         "BACKEND": "emark.backends.ConsoleEmailBackend",
     }
 }
-
-# Django 6.0 and earlier
-EMAIL_BACKEND = "emark.backends.ConsoleEmailBackend"
 ```
 
 The `ConsoleEmailBackend` will only print the plain text version of the email.
