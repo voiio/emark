@@ -2,13 +2,24 @@ import io
 import smtplib
 from unittest.mock import MagicMock, Mock
 
+import django
 import pytest
 from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.test import override_settings
 from emark import backends
 from emark.models import Send
 
 
 class TestConsoleEmailBackend:
+    @pytest.mark.skipif(django.VERSION < (6, 1), reason="MAILERS requires Django 6.1+")
+    @override_settings(
+        MAILERS={
+            "default": {"BACKEND": "emark.backends.ConsoleEmailBackend"},
+        }
+    )
+    def test_mailers(self, email_message):
+        assert email_message.send(using="default") == 1
+
     def test_write_message__single(self):
         msg = EmailMessage(body="foo\nbar")
         with io.StringIO() as stream:
