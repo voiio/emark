@@ -9,6 +9,13 @@ from emark.models import Send
 
 
 class TestConsoleEmailBackend:
+    def test_mailers(self, email_message, settings):
+        pytest.importorskip("django", minversion="6.1")
+        settings.MAILERS = {
+            "default": {"BACKEND": "emark.backends.ConsoleEmailBackend"},
+        }
+        assert email_message.send(using="default") == 1
+
     def test_write_message__single(self):
         msg = EmailMessage(body="foo\nbar")
         with io.StringIO() as stream:
@@ -28,7 +35,7 @@ class TestConsoleEmailBackend:
 
 class TestSMTPEmailBackend:
     def test_enter(self):
-        with backends.SMTPEmailBackend() as backend:
+        with backends.SMTPEmailBackend(alias="default", host="localhost") as backend:
             assert not backend.connection, "Connection should not be opened"
 
     def test_send(self, email_message):
@@ -36,7 +43,7 @@ class TestSMTPEmailBackend:
             def _send(self, message):
                 return bool(message.html)
 
-        backend = TestBackend(fail_silently=False)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
 
@@ -108,7 +115,9 @@ class TestTrackingConsoleEmailBackend:
 
 class TestTrackingSMTPEmailBackend:
     def test_enter(self):
-        with backends.TrackingSMTPEmailBackend() as backend:
+        with backends.TrackingSMTPEmailBackend(
+            alias="default", host="localhost"
+        ) as backend:
             assert not backend.connection, "Connection should not be opened"
 
     @pytest.mark.django_db
@@ -122,7 +131,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=False)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
         assert backend.connection.sendmail.call_count == 1
@@ -144,7 +153,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=False)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
         assert backend.connection.sendmail.call_count == 1
@@ -158,7 +167,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=False)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=False)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
         assert backend.connection.sendmail.call_count == 1
@@ -177,7 +186,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=False)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=False)
         backend.connection = Mock()
         backend.connection.sendmail.side_effect = smtplib.SMTPException
         with pytest.raises(smtplib.SMTPException):
@@ -196,7 +205,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=True)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=True)
         backend.connection = Mock()
         assert backend.send_messages([email_message]) == 1
         assert backend.connection.sendmail.call_count == 1
@@ -215,7 +224,7 @@ class TestTrackingSMTPEmailBackend:
         class TestBackend(backends.TrackingSMTPEmailBackend):
             connection_class = MagicMock
 
-        backend = TestBackend(fail_silently=True)
+        backend = TestBackend(alias="default", host="localhost", fail_silently=True)
         backend.connection = Mock()
         backend.connection.sendmail.side_effect = smtplib.SMTPException
         assert backend.send_messages([email_message]) == 0

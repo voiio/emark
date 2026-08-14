@@ -135,8 +135,13 @@ pixel and redirect view. However, it will send a separate email for each
 recipient, which may not be desirable in all cases.
 
 ```python
-# settings.py
-EMAIL_BACKEND = "emark.backends.TrackingSMTPEmailBackend"
+# settings.py (Django 6.1+)
+MAILERS = {
+    "default": {
+        "BACKEND": "emark.backends.TrackingSMTPEmailBackend",
+        "OPTIONS": {"host": "smtp.example.com"},
+    }
+}
 ```
 
 Furthermore, you need to add the tracking view to your `urls.py`:
@@ -226,8 +231,12 @@ Pretty HTML emails are great, unless they spam your console during development.
 To prevent this, you can use the `ConsoleEmailBackend`:
 
 ```python
-# settings.py
-EMAIL_BACKEND = "emark.backends.ConsoleEmailBackend"
+# settings.py (Django 6.1+)
+MAILERS = {
+    "default": {
+        "BACKEND": "emark.backends.ConsoleEmailBackend",
+    }
+}
 ```
 
 The `ConsoleEmailBackend` will only print the plain text version of the email.
