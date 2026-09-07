@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block breadcrumbs %}
   <div class="breadcrumbs">
-    <a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
-    &rsaquo;
+    <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+    ›
     <a href="{% url 'emark-dashboard:dashboard' %}">{{ title }}</a>
-    &rsaquo; {{ subtitle }}
+    › {{ subtitle }}
   </div>
 {% endblock %}
 {% block content %}
