@@ -28,25 +28,25 @@ classifiers = [
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Framework :: Django",
   "Framework :: Django :: 5.2",
   "Framework :: Django :: 6.0",
   "Framework :: Django :: 6.1",
 ]
-requires-python = ">=3.10"
-dependencies = ["django>=5.2.13", "markdown", "premailer"]
+requires-python = ">=3.11"
+dependencies = ["django>=5.2.18", "markdown>=3.5", "premailer>=3.10.0"]
 
 [project.optional-dependencies]
 test = [
-  "pytest",
-  "pytest-cov",
-  "pytest-django",
-  "model_bakery",
+  "pytest>=9.0.3",
+  "pytest-cov>=6.0.0",
+  "pytest-django>=4.11.1",
+  "model-bakery",
 ]
 
 [project.urls]
@@ -60,8 +60,8 @@ name = "emark"
 write_to = "emark/_version.py"
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "--cov --tb=short -rxs"
+minversion = "9.0.3"
+addopts = "--cov --cov-report=xml --cov-report=term --tb=short -rxs"
 testpaths = ["tests"]
 DJANGO_SETTINGS_MODULE = "tests.testapp.settings"
 
