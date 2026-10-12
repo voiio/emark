@@ -46,7 +46,7 @@ test = [
   "pytest>=9.0.3",
   "pytest-cov>=6.0.0",
   "pytest-django>=4.11.1",
-  "model-bakery",
+  "model-bakery>=1.20.5",
 ]
 
 [project.urls]
