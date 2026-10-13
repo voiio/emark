@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - run: sudo apt-get update && sudo apt-get install -y gettext
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: "3.15"
       - run: uv build
@@ -64,7 +64,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - run: sudo apt-get update && sudo apt-get install -y gettext
-      - uses: astral-sh/setup-uv@v10.2.0
+      - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv venv
