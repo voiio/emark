@@ -2,8 +2,8 @@
 ## JS
 package-lock.json @SebastianKapunkt @mostafa-anm
 ## Python
-pyproject.toml @herrbenesch @amureki
-Pipfile.lock @herrbenesch @amureki
+pyproject.toml @herrbenesch
+Pipfile.lock @herrbenesch
 ## GitHub Actions
-.github/workflows/ci.yml @herrbenesch @amureki
-.github/workflows/release.yml @herrbenesch @amureki
+.github/workflows/ci.yml @herrbenesch
+.github/workflows/release.yml @herrbenesch
