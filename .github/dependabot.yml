@@ -8,3 +8,6 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    cooldown:
+      # Security updates bypass Dependabot cooldown.
+      default-days: 7
